@@ -1,0 +1,83 @@
+<Node name="Simulation" dt="0.01" gravity="0 -10 0">
+        <DefaultAnimationLoop  />
+
+        <Node name="FEM" >
+<!--                <EulerExplicit name="integrator" vdamping="0.98" />-->
+                <EulerImplicit name="integrator" rayleighMass="0.1" rayleighStiffness="0.1"  vdamping="1.0" />
+                <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-6" />
+
+                <MeshGmshLoader name="topology" filename="liver.msh" />
+		<TetrahedronSetTopologyContainer src="@topology" name="Container" />
+		
+                <MechanicalObject name="mstate" />
+		
+                <UniformMass name="prout" mass="0.2" />
+                <TetrahedronFEMForceField youngModulus="500" poissonRatio="0.4" method="large" />
+		
+                <BoxConstraint name="b2" box="-1 -1 -1  10 10 10" />
+		
+                <Node name="VM" >
+                        <MeshObjLoader name="loader" filename="liver-smoothUV.obj" />
+                        <TriangleSetTopologyContainer name="triTopo" src="@loader" />
+
+                        <OglShader vertFilename="shaders/generalRenderingShader.vert" fragFilename="shaders/generalRenderingShader.frag"/>
+                        <OglShaderDefineMacro id="TRI_TEXTURING" />
+                        <OglShaderDefineMacro id="TRI_TEXTURING_SINGLE_TEXTURE" />
+                        <OglShaderDefineMacro id="PHONG" />
+                        <OglShaderDefineMacro id="BUMP_MAPPING" />
+                        <OglFloat2Variable name="scaleTexture" id="scaleTexture" value="2 2" />
+                        <OglFloatVariable name="bumpFactor" id="bumpFactor" value="1" />
+                        
+                        <OglTexture id="planarTexture" textureFilename="liver-cyrrhosis.png" textureUnit="1" repeat="true"/>
+                        <OglTexture id="normalMap" textureFilename="liver-cyrrhosis-NM.png" textureUnit="2" repeat="true"/>
+
+                        <OglShaderVisualModel name="visualModel" material="texture Ambient 1 0.8 0.8 0.8 1.0 Diffuse 1 1.0 1.0 1.0 1.0 Specular 1 1.0 1.0 1.0 1.0 Emissive 0 0.15 0.05 0.05 0.0 Shininess 1 100" />
+
+                        <BarycentricMapping />
+                </Node>
+        </Node>
+        
+        
+        
+        <Node name="FEM" >
+<!--                <EulerExplicit name="integrator" vdamping="0.98" />-->
+                <EulerImplicit name="integrator" rayleighMass="0.1" rayleighStiffness="0.1"  vdamping="1.0" />
+                <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-6" />
+
+                <MeshGmshLoader name="topology" filename="liver.msh" />
+		<TetrahedronSetTopologyContainer src="@topology" name="Container" />
+		
+                <MechanicalObject name="mstate" dy="5" />
+		
+                <UniformMass name="prout" mass="0.2" />
+                <TetrahedronFEMForceField youngModulus="500" poissonRatio="0.4" method="large" />
+		
+                <BoxConstraint name="b2" box="-1 -1 -1  10 10 10" />
+		
+                <Node name="VM" >
+                        <MeshObjLoader name="loader" filename="liver-smoothUV.obj" />
+                        <TriangleSetTopologyContainer name="triTopo" src="@loader" />
+
+                        <OglShader vertFilename="shaders/generalRenderingShader.vert" fragFilename="shaders/generalRenderingShader.frag"/>
+                        <OglShaderDefineMacro id="TRI_TEXTURING" />
+                        <OglShaderDefineMacro id="TRI_TEXTURING_SINGLE_TEXTURE" />
+                        <OglShaderDefineMacro id="PHONG" />
+                        <OglShaderDefineMacro id="BUMP_MAPPING" />
+                        <OglFloat2Variable name="scaleTexture" id="scaleTexture" value="2 2" />
+                        <OglFloatVariable name="bumpFactor" id="bumpFactor" value="1" />
+                        
+                        <OglTexture id="planarTexture" textureFilename="liver-cyrrhosis.png" textureUnit="1" repeat="true"/>
+                        <OglTexture id="normalMap" textureFilename="liver-cyrrhosis-NM.png" textureUnit="2" repeat="true"/>
+
+                        <OglShaderVisualModel name="visualModel" material="texture Ambient 1 0.8 0.8 0.8 1.0 Diffuse 1 1.0 1.0 1.0 1.0 Specular 1 1.0 1.0 1.0 1.0 Emissive 0 0.15 0.05 0.05 0.0 Shininess 1 100" />
+
+                        <BarycentricMapping />
+                </Node>
+        </Node>
+
+</Node>
+
+
+
+
+
