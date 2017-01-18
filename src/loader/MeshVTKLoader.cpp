@@ -7,10 +7,10 @@ MeshVTKLoader::MeshVTKLoader()
 
 
 //// TODO : implement this function
-//bool MeshVTKLoader::read_vtk_node(State * state,std::ifstream & in) {}
+//bool MeshVTKLoader::read_vtk_nodes(State * state,std::ifstream & in) {}
 
 //// TODO : implement this function
-//bool MeshVTKLoader::read_vtk_element(Topology * topo,std::ifstream & in) {}
+//bool MeshVTKLoader::read_vtk_elements(Topology * topo,std::ifstream & in) {}
 
 bool MeshVTKLoader::read_vtk_texture(State * state,Topology * topo,std::ifstream & in) {
     std::string line;
