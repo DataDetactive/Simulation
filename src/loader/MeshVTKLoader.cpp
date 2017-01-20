@@ -12,7 +12,7 @@ MeshVTKLoader::MeshVTKLoader()
 //// TODO : implement this function
 //bool MeshVTKLoader::read_vtk_elements(Topology * topo,std::ifstream & in) {}
 
-bool MeshVTKLoader::read_vtk_texture(State * state,Topology * topo,std::ifstream & in) {
+bool MeshVTKLoader::read_vtk_textures(State * state,Topology * topo,std::ifstream & in) {
     std::string line;
     getline( in, line );
 
@@ -46,13 +46,13 @@ void MeshVTKLoader::load(Topology * topo,State * state, const char * filename) {
 
     while (in >> type) {
         if (type == "POINTS") {
-            if (! read_vtk_node(state,in)) return ;
+            if (! read_vtk_nodes(state,in)) return ;
         } else if (type == "CELLS") {
-            if (! read_vtk_element(topo,in)) return ;
+            if (! read_vtk_elements(topo,in)) return ;
         } else if (type == "POLYGONS") {
-            if (! read_vtk_element(topo,in)) return ;
+            if (! read_vtk_elements(topo,in)) return ;
         } else if (type == "TEXTURE_COORDINATES") {
-            if (! read_vtk_texture(state,topo,in)) return ;
+            if (! read_vtk_textures(state,topo,in)) return ;
         }
     }
 

@@ -14,7 +14,7 @@ private:
 
     bool read_vtk_nodes(State * state, std::ifstream & in);
 
-    bool read_vtk_texture(State * state,Topology * topo,std::ifstream & in);
+    bool read_vtk_textures(State * state,Topology * topo,std::ifstream & in);
 
     bool read_vtk_elements(Topology * topo,std::ifstream & in);
 
