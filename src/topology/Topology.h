@@ -25,6 +25,7 @@ public:
 
     void updateNormals();
 
+    void draw(DisplayFlag flag);
 
 protected:
     std::vector<TTetra> m_tetras;

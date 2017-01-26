@@ -20,8 +20,6 @@ public:
 
     virtual void addDForce(MechanicalParams params,TVecId dx,TVecId df) = 0;
 
-    void draw(DisplayFlag flag);
-
 protected:
     std::vector<TMat3x3> m_iR;
     std::vector<TMat3x3> m_R;

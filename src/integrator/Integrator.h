@@ -15,21 +15,4 @@ public:
     virtual void step(double dt) = 0;
 };
 
-class IntegratorStepVisitor : public Visitor {
-public:
-    IntegratorStepVisitor(double d) : Visitor(true) {
-        m_dt = d;
-    }
-
-    bool processObject(BaseObject *o) {
-        if (dynamic_cast<Integrator *>(o)) {
-            ((Integrator *) o)->step(m_dt);
-        }
-
-        return true;
-    }
-
-    double m_dt;
-};
-
 #endif

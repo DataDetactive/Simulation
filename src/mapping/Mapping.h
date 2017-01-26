@@ -10,20 +10,20 @@
 class Mapping : public BaseObject {
 public:
 
-    Data<std::string> m_input;
-    Data<std::string> m_output;
+    Data<std::string> d_input;
+    Data<std::string> d_output;
 
     Mapping()
-    : m_input("input","..",this)
-    , m_output("output",".",this) {
+    : d_input("input","..",this)
+    , d_output("output",".",this) {
         m_stateFrom = NULL;
         m_stateTo = NULL;
     }
 
 
     void init() {
-        BaseObject * obj1 = this->getContext()->get(m_input.getValue());
-        BaseObject * obj2 = this->getContext()->get(m_output.getValue());
+        BaseObject * obj1 = this->getContext()->get(d_input.getValue());
+        BaseObject * obj2 = this->getContext()->get(d_output.getValue());
 
         if (obj1 == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate source" << std::endl;
         if (obj2 == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate dest" << std::endl;
@@ -51,20 +51,6 @@ protected:
     State * m_stateFrom;
     State * m_stateTo;
 
-};
-
-
-class MappingApplyVisitor : public Visitor {
-public:
-    MappingApplyVisitor() : Visitor(true) {}
-
-    bool processObject(BaseObject *o) {
-        if (dynamic_cast<Mapping *>(o)) {
-            ((Mapping *) o)->apply();
-        }
-
-        return true;
-    }
 };
 
 class MappingApplyJTVisitor : public Visitor {

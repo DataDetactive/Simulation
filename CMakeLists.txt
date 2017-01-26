@@ -3,6 +3,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(microSofa)
 
+#SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCMAKE_BUILD_TYPE=Release")
+#SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCMAKE_BUILD_TYPE=Debug")
+
 set(HEADER_FILES
     src/core/Node.h
     src/core/BaseObject.h

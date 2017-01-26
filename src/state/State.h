@@ -34,8 +34,6 @@ public:
 
     void setMapped(bool b);
 
-    virtual void draw(DisplayFlag flag);
-
 private:
     std::map<TVecId,std::vector<TVec3> *> m_mapState;
     unsigned m_size;

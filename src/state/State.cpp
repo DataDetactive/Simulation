@@ -83,21 +83,5 @@ bool State::isMechanical() {
     return ! m_mapped;
 }
 
-void State::draw(DisplayFlag flag) {
-    if (! flag.isActive(DisplayFlag::STATE)) return;
-
-    glColor3f(0.0f,0.0f,0.0f);
-    glPointSize(1);
-    glBegin(GL_POINTS);
-    std::vector<TVec3> & X = get(VecID::position);
-
-    for (unsigned i=0;i<X.size();i++) {
-        glVertex3fv(X[i].ptr());
-    }
-
-    glEnd();
-    glPointSize(1);
-}
-
 DECLARE_CLASS(State)
 DECLARE_ALIAS(MechanicalObject,State)

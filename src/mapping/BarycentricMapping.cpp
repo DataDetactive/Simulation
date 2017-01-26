@@ -14,6 +14,7 @@ void BarycentricMapping::init() {
     if (m_stateFrom == NULL) return;
     if (m_stateTo == NULL) return;
 
+    // we need the topology of the mstateFrom, we exectute a visitor from the context of the mstateFrom
     m_topology = FindVisitor<Topology>().find(m_stateFrom->getContext());
     if (m_topology == NULL) {
         std::cerr << "Error BarycentricMapping " << this->getName() << " cannot find topology from mstate " << m_stateFrom->getName() << std::endl;
@@ -24,6 +25,9 @@ void BarycentricMapping::init() {
     const std::vector<TVec3> & in = m_stateFrom->get(VecID::position);
     const std::vector<TVec3> & out = m_stateTo->get(VecID::position);
 
+    //For all points in out (i.e. the mstate dest):
+    // map_i store the id of the tetra in which out[i] is located
+    // map_f store the barycentric coordinates of the point inside the tetra
     m_map_i.resize(out.size());
     m_map_f.resize(out.size());
 
