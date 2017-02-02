@@ -15,7 +15,7 @@ public:
 
     void apply();
 
-    void applyJT(TVecId f);
+    void applyJT(TVecId vf);
 
     void draw(DisplayFlag flag);
 

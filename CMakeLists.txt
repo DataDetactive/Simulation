@@ -23,8 +23,6 @@ set(HEADER_FILES
     src/forcefield/ForceField.h
     src/forcefield/UniformMass.h
     src/forcefield/TetrahedronFEMForceField.h
-    src/forcefield/TetrahedronFEMForceField_assembled.h
-    src/forcefield/TetrahedronFEMForceField_optim.h
     src/constraint/Constraint.h
     src/constraint/BoxConstraint.h
     src/state/State.h
@@ -61,8 +59,6 @@ set(SOURCE_FILES
     src/topology/Topology.cpp
     src/forcefield/UniformMass.cpp
     src/forcefield/TetrahedronFEMForceField.cpp
-    src/forcefield/TetrahedronFEMForceField_assembled.cpp
-    src/forcefield/TetrahedronFEMForceField_optim.cpp
     src/constraint/BoxConstraint.cpp
     src/state/State.cpp
     src/state/OglModel.cpp

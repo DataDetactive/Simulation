@@ -14,15 +14,16 @@ public:
 
     TetrahedronFEMForceField();
 
-    virtual void init() = 0;
+    void init();
 
-    virtual void addForce(TVecId f) = 0;
+    void addForce(TVecId f);
 
-    virtual void addDForce(MechanicalParams params,TVecId dx,TVecId df) = 0;
+    void addDForce(MechanicalParams params,TVecId dx,TVecId df);
 
 protected:
     std::vector<TMat3x3> m_iR;
     std::vector<TMat3x3> m_R;
+    std::vector<TMat12x12> m_vecKe;
 
 };
 

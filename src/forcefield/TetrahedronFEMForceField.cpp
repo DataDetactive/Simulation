@@ -1,4 +1,4 @@
-#include <forcefield/TetrahedronFEMForceField_optim.h>
+#include <forcefield/TetrahedronFEMForceField.h>
 #include <state/State.h>
 #include <stdio.h>
 #include <iostream>
@@ -13,5 +13,14 @@ TetrahedronFEMForceField::TetrahedronFEMForceField()
 , d_method("method","large",this)
 {}
 
+//// TODO : implement this function
+//void TetrahedronFEMForceField_assembled::init() {}
 
+//// TODO : implement this function
+//void TetrahedronFEMForceField_assembled::addForce(TVecId vf) {}
+
+//// TODO : implement this function
+//void TetrahedronFEMForceField_assembled::addDForce(MechanicalParams params,TVecId vdx,TVecId vdf) {}
+
+DECLARE_CLASS(TetrahedronFEMForceField)
 
