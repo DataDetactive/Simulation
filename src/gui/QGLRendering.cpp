@@ -59,37 +59,23 @@
 #include <stdlib.h>
 #include <core/Node.h>
 
-QGLRendering::QGLRendering(MainWindow * mw) {
+QGLRendering::QGLRendering(MainWindow * mw) : QOpenGLWidget() {
     main_mindow = mw;
 }
 
 void QGLRendering::initializeGL() {
-    QGLWidget::initializeGL();
-//    this->initializeGL();
-//    if (glut_start_step > 0) return;
+    QOpenGLWidget::initializeGL();
 
-//    glutInit(&argc, argv);
-//    if (strstr((const char *) glGetString(GL_EXTENSIONS),"GL_ARB_multitexture")) {
-//        PFNGLACTIVETEXTUREARBPROC tglActiveTextureARB       = (PFNGLACTIVETEXTUREARBPROC)glXGetProcAddress((const GLubyte*) "glActiveTextureARB");
-//        PFNGLCLIENTACTIVETEXTUREARBPROC tglClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)glXGetProcAddress((const GLubyte*) "glClientActiveTextureARB");
-//        if (!tglActiveTextureARB || !tglClientActiveTextureARB) {
-//            std::cerr << "impossible d'initialiser l'extension GL_ARB_multitexture" << std::endl;
-//            exit(0);
-//        } else {
-//            glActiveTextureARB = tglActiveTextureARB;
-//            glClientActiveTextureARB = tglClientActiveTextureARB;
-//        }
-//    } else {
-//        std::cerr << "votre carte ne supporte pas l'extension GL_ARB_multitexture" << std::endl;
-//        exit(0);
-//    }
+    main_mindow->m_displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
+
+//    glutInit(argc, argv);
 //    glutInitWindowSize(window_width, window_height);
 //    glutInitDisplayString("rgba depth>=16 double samples");
-//    glutInit(&argc, argv);
+
 //    winid = glutCreateWindow(title_loading);
 //    glutReshapeFunc ( reshape );
 //    glutDisplayFunc ( display );
-//    glutIdleFunc ( idle );
+//	glutIdleFunc ( idle );
 //    glutMouseFunc ( mouse );
 //    glutMotionFunc ( motion );
 //    glutKeyboardFunc ( keyboard );
@@ -109,55 +95,23 @@ void QGLRendering::initializeGL() {
 
 //    glClearColor ( background_color[0], background_color[1], background_color[2], background_color[3] );
 
-//    glut_start_step = 1;
+    main_mindow->m_simulation.init();
+//    reshape(window_width, window_height);
+//    glutSetWindowTitle(pause_animation ? title_paused : title_active);
 }
 
 void QGLRendering::paintGL() {
+    main_mindow->m_simulation.step();
 
-//    if (anim_iteration % FPS_ITERATIONS == 0) {
-//        if (anim_iteration > 0) {
-//            double dt = t - iter_last_time;
-//            fps = (FPS_ITERATIONS*1000) / dt;
-//            int s = (anim_iteration/FPS_ITERATIONS);
-//            iter_time_buffer[(s-1) % FPS_SAMPLES] = dt;
-//            int ns = (s >= FPS_SAMPLES) ? FPS_SAMPLES : s;
-//            double ttotal = 0;
-//            for (int i = s-ns; i < s; ++i)
-//                ttotal += iter_time_buffer[i % FPS_SAMPLES];
-//            mean_fps = (ns * FPS_ITERATIONS * 1000) / ttotal;
+    main_mindow->m_simulation.render(main_mindow->m_displayFlag);
 
-//        }
-//        iter_last_time = t;
-//    }
 
-    printf("HO\n");
-//    main_mindow->simulation.step();
-
-    DisplayFlag flag;
-    flag.flag = 1<< DisplayFlag::VISUAL;
-    main_mindow->simulation.render(flag);
-
-        //    ++nb_idle;
-
-        //    if (glut_start_step == 1) {
-        ////        if (nb_idle < 10) {
-        ////            glutPostRedisplay();
-        ////        }
-        //        setup_glut();
-        //    }
-
-        //    if (glut_start_step < 2) return;
-
-        //    if (!pause_animation) simulation.step(glutGet(GLUT_ELAPSED_TIME));
-
-        //    glutPostRedisplay();
-
-//    this->update();
+    this->update();
 }
 
 
 void QGLRendering::resizeGL(int w, int h) {
-    QGLWidget::resizeGL(w,h);
+    QOpenGLWidget::resizeGL(w,h);
 
     TReal simulation_size = 10;//(main_mindow->simulation.main_Node->getBBox().max - main_mindow->simulation.main_Node->getBBox().min).norm();
 

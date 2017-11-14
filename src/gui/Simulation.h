@@ -2,8 +2,6 @@
 #define SIMULATION_H
 
 #include <gui/Simulation.h>
-#include <Sofa/Vec.h>
-#include <Sofa/Mat.h>
 #include <dataStructures.h>
 #include <core/Node.h>
 #include <animationloop/AnimationLoop.h>

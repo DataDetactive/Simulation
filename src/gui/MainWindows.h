@@ -51,6 +51,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <gui/Gui.h>
 #include <QMainWindow>
 #include <gui/Simulation.h>
 //#include "QGLRendering.h"
@@ -58,37 +59,22 @@
 
 class QGLRendering;
 
-QT_BEGIN_NAMESPACE
-class QAction;
-class QToolBox;
-class QSpinBox;
-class QComboBox;
-class QFontComboBox;
-class QButtonGroup;
-class QLineEdit;
-class QGraphicsTextItem;
-class QFont;
-class QToolButton;
-class QAbstractButton;
-class QGraphicsView;
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class MainWindow : public Gui, public QMainWindow
 {
-    Q_OBJECT
-
 public:
-   MainWindow(int argc, char **argv);
 
-   std::string cpu_name();
+   void init(int argc, char **argv);
+
+   int run();
 
    QGLRendering *rendering;
 //   DiagramScene *scene;
-   QGraphicsView *view;
+//   QGraphicsView *view;
 
-   QMenu *itemMenu;
+//   QMenu *itemMenu;
 
-   Simulation simulation;
+   Simulation m_simulation;
+   DisplayFlag m_displayFlag;
 
 };
 

@@ -1,19 +1,28 @@
 #include <gui/glut_methods.h>
-#include <gui/Simulation.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <iostream>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <core/Node.h>
+#include <stdio.h>
+
+
+
 
 //// GLUT Methods ////
 
-extern Simulation simulation;
 TColor background_color = TColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-int glut_start_step = 0;
 int pause_animation = true;
 int camera_mode = -1;
 int window_width = 800;
 int window_height = 600;
 int winid = 0;
 //int menuid = 0;
-int nb_idle = 0;
 
 #if !defined(GLUT_WHEEL_UP)
 #  define GLUT_WHEEL_UP   3
@@ -44,6 +53,8 @@ float drawText_alignV = 0;
 DisplayFlag displayFlag;
 std::string device_name;
 
+Simulation * simulation = NULL;
+
 int anim_iteration;
 int iter_last_time;
 double fps;
@@ -53,51 +64,48 @@ enum { FPS_ITERATIONS=100 };
 enum { FPS_SAMPLES=10 };
 double iter_time_buffer[FPS_SAMPLES];
 
+void reshape(int w, int h);
+void display();
+void idle();
+void mouse(int button, int state, int x, int y);
+void motion(int x, int y);
+void keyboard(unsigned char key, int x, int y);
+void special(int key, int x, int y);
+void close();
+void menu(int item);
+void drawTextFont(float size, bool serif = false);
+void drawTextAlign(float h, float v);
+void drawTextPos(float x, float y);
+float drawText(const char* str);
+float drawTextF(const char* fmt, ...);
+void init_glut(int* argc, char** argv);
+void run_glut();
 
-static void cpuid(unsigned int a, unsigned int b[4])
-{
-    asm volatile("xchgl %%ebx, %1\n"
-                 "cpuid\n"
-                 "xchgl %%ebx, %1\n"
-                 :"=a"(*b),"=r"(*(b+1)),
-                 "=c"(*(b+2)),"=d"(*(b+3)):"0"(a));
-}
-
-std::string cpu_name()
-{
-    unsigned int b[13] = {0};
-    cpuid(0x80000000,b);
-    unsigned int max = b[0];
-    if (max < 0x80000004) return std::string();
-    cpuid(0x80000002,b);
-    cpuid(0x80000003,b+4);
-    cpuid(0x80000004,b+8);
-    std::string s;
-    b[12] = 0;
-    const char* p = (const char*)b;
-    char last = '\0';
-    while (*p)
-    {
-        char c = *p; ++p;
-        if (c == ' ' && last == ' ') continue;
-        if (c == '(')
-        {
-            while (*p && c != ')') c = *p++;
-            continue;
-        }
-        s += c; last = c;
-    }
-    return s;
-}
-void init_glut(int* argc, char** argv)
-{
-    displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
+void GuiGlut::init(int argc, char ** argv) {
+    parentProcessDir = getProcessFullPath(argv[0]);
+    parentProcessDir = getParentDir(parentProcessDir);
+    parentSceneDir = getParentDir(argv[1]);
 
     std::ostringstream o;
     o << "CPU: " << cpu_name();
     device_name = o.str();
 
-    if (glut_start_step > 0) return;
+    if (! m_simulation.read_scene(argv[1])) return;
+    simulation = &m_simulation;
+
+    init_glut(&argc,argv);
+}
+
+int GuiGlut::run() {
+    run_glut();
+    return 0;
+}
+
+
+void init_glut(int* argc, char** argv)
+{
+    displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
+
     glutInit(argc, argv);
     glutInitWindowSize(window_width, window_height);
     glutInitDisplayString("rgba depth>=16 double samples");
@@ -125,19 +133,11 @@ void init_glut(int* argc, char** argv)
 
     glClearColor ( background_color[0], background_color[1], background_color[2], background_color[3] );
 
-    glut_start_step = 1;
-
-
+    simulation->init();
+//    reshape(window_width, window_height);
+//    glutSetWindowTitle(pause_animation ? title_paused : title_active);
 }
 
-void setup_glut()
-{
-    if (glut_start_step != 1) return;
-    glut_start_step = 2;
-    simulation.init();
-    reshape(window_width, window_height);
-    glutSetWindowTitle(pause_animation ? title_paused : title_active);
-}
 
 void run_glut()
 {
@@ -146,10 +146,11 @@ void run_glut()
 
 void reshape(int w, int h)
 {
-    TReal simulation_size = simulation.getSize();
+    TReal simulation_size = simulation->getSize();
 
     window_width = w;
     window_height = h;
+
     glViewport(0, 0, w, h);
     glMatrixMode   ( GL_PROJECTION );  // Select The Projection Matrix
     glLoadIdentity ( );                // Reset The Projection Matrix
@@ -160,69 +161,57 @@ void reshape(int w, int h)
 void display()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    if (glut_start_step >= 2)
-    {
-        simulation.render(displayFlag);
 
-        if (displayFlag.isActive(DisplayFlag::STATS)) {
-            glDisable(GL_DEPTH_TEST);
+    simulation->render(displayFlag);
 
-            glMatrixMode(GL_PROJECTION);
-            glPushMatrix();
-            glLoadIdentity();
-            gluOrtho2D(0.5f, window_width+0.5f, 0.5f, window_height+0.5f);
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glLoadIdentity();
-            glEnable(GL_BLEND);
+    if (displayFlag.isActive(DisplayFlag::STATS)) {
+        glDisable(GL_DEPTH_TEST);
 
-            if (background_color[0] > 0.5f)
-                glColor4f(0.0f,0.0f,0.0f,1.0f);
-            else
-                glColor4f(1.0f,1.0f,1.0f,1.0f);
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        gluOrtho2D(0.5f, window_width+0.5f, 0.5f, window_height+0.5f);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        glEnable(GL_BLEND);
 
-            if (background_color[0] > 0.5f)
-                glColor4f(0.0f,0.0f,0.0f,1.0f);
-            else
-                glColor4f(1.0f,1.0f,1.0f,1.0f);
-            drawTextFont(15);
-            drawTextAlign(0,0);
+        if (background_color[0] > 0.5f)
+            glColor4f(0.0f,0.0f,0.0f,1.0f);
+        else
+            glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-            if (pause_animation) {
-                drawTextPos(window_width/2.0-120,window_height-20.0);
-                drawTextF("PAUSE : press SPACE to start the animation");
-            }
+        if (background_color[0] > 0.5f)
+            glColor4f(0.0f,0.0f,0.0f,1.0f);
+        else
+            glColor4f(1.0f,1.0f,1.0f,1.0f);
+        drawTextFont(15);
+        drawTextAlign(0,0);
 
-            drawTextPos(10,20);
-            drawTextF("FPS: %.1f",fps);
-            drawTextF("%s",device_name.c_str());
-            drawTextF("Picking Stiffness: %.1f",simulation.getPickingStiffness());
-            drawTextF("");
-
-            glDisable(GL_BLEND);
-            glEnable(GL_DEPTH_TEST);
-            glMatrixMode(GL_PROJECTION);
-            glPopMatrix();
-            glMatrixMode(GL_MODELVIEW);
-            glPopMatrix();
+        if (pause_animation) {
+            drawTextPos(window_width/2.0-120,window_height-20.0);
+            drawTextF("PAUSE : press SPACE to start the animation");
         }
+
+        drawTextPos(10,20);
+        drawTextF("FPS: %.1f",fps);
+        drawTextF("%s",device_name.c_str());
+        drawTextF("Picking Stiffness: %.1f",simulation->getPickingStiffness());
+        drawTextF("");
+
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
     }
+
     glutSwapBuffers();
 }
 
 void idle()
 {
-    ++nb_idle;
-
-    if (glut_start_step == 1) {
-//        if (nb_idle < 10) {
-//            glutPostRedisplay();
-//        }
-        setup_glut();
-    }
-
-    if (glut_start_step < 2) return;
-
     if (!pause_animation) {
         double t = glutGet(GLUT_ELAPSED_TIME);
 
@@ -242,7 +231,7 @@ void idle()
             iter_last_time = t;
         }
 
-        simulation.step();
+        simulation->step();
 
         ++anim_iteration;
     }
@@ -252,25 +241,21 @@ void idle()
 
 void motion(int x, int y)
 {
-    if (glut_start_step < 2) return;
-
     int dx = x - mouse_x;
     int dy = y - mouse_y;
 
     mouse_x = x;
     mouse_y = y;
 
-    if (camera_mode == 0) simulation.rotateCamera(dx,dy);
-    else if (camera_mode == 1) simulation.translateCamera(dx,dy);
-    else if (camera_mode == 2) simulation.zoomCamera(dx,dy);
-    else if (camera_mode == 3) simulation.updatePickingForce(x,y);
-    else if (camera_mode == 4) simulation.updatePickingConstraint(x,y);
+    if (camera_mode == 0) simulation->rotateCamera(dx,dy);
+    else if (camera_mode == 1) simulation->translateCamera(dx,dy);
+    else if (camera_mode == 2) simulation->zoomCamera(dx,dy);
+    else if (camera_mode == 3) simulation->updatePickingForce(x,y);
+    else if (camera_mode == 4) simulation->updatePickingConstraint(x,y);
 }
 
 void mouse(int button, int state, int x, int y)
 {
-    if (glut_start_step < 2) return;
-
     camera_mode = -1;
     motion(x,y);
     int modifiers = glutGetModifiers();
@@ -280,30 +265,30 @@ void mouse(int button, int state, int x, int y)
         case GLUT_LEFT_BUTTON :
             if (state == GLUT_DOWN) {
                 if (modifiers == GLUT_ACTIVE_SHIFT) {
-                    simulation.startForcePicking(x,y);
+                    simulation->startForcePicking(x,y);
                     camera_mode = 3;
                 } else {
                     camera_mode = 0;
                 }
-            } else simulation.stopForcePicking();
+            } else simulation->stopForcePicking();
 
             break;
         case GLUT_RIGHT_BUTTON :
             if (state == GLUT_DOWN) {
                 if (modifiers == GLUT_ACTIVE_SHIFT) {
-                    simulation.startConstraintPicking(x,y);
+                    simulation->startConstraintPicking(x,y);
                     camera_mode = 4;
                 } else {
                     camera_mode = 1;
                 }
-            } else simulation.stopConstraintPicking();
+            } else simulation->stopConstraintPicking();
 
             break;
         case GLUT_WHEEL_UP:
-            simulation.zoomCamera(0,10);
+            simulation->zoomCamera(0,10);
             break;
         case GLUT_WHEEL_DOWN:
-            simulation.zoomCamera(0,-10);
+            simulation->zoomCamera(0,-10);
 //            glutPostRedisplay();
             break;
     }
@@ -311,8 +296,6 @@ void mouse(int button, int state, int x, int y)
 
 void keyboard(unsigned char key, int /*x*/, int /*y*/)
 {
-    if (glut_start_step < 2 && key != 27) return;
-
     switch (key)
     {
     case ' ': // SPACE
@@ -323,7 +306,7 @@ void keyboard(unsigned char key, int /*x*/, int /*y*/)
     }
     case 8: // DEL
     case '0':
-        simulation.reset_camera();
+        simulation->reset_camera();
 //        if (pause_animation) glutPostRedisplay();
         break;
     case 27: // ESC
@@ -348,59 +331,52 @@ void keyboard(unsigned char key, int /*x*/, int /*y*/)
         }
         break;
     case '+': // ENTER
-        simulation.addPickingStiffness(10);
+        simulation->addPickingStiffness(10);
         break;
     case '-': // ENTER
-        simulation.addPickingStiffness(-10);
+        simulation->addPickingStiffness(-10);
         break;
     case 's': // STEP
         pause_animation = true;
-        simulation.step();
+        simulation->step();
 //        glutPostRedisplay();
     }
 }
 
-void switchFlag(DisplayFlag::DisplayMode mode) {
-    if (displayFlag.isActive(mode)) displayFlag.flag &= ~(1<<mode);
-    else displayFlag.flag |= (1<<mode);
-}
-
 void special(int key, int /*x*/, int /*y*/)
 {
-    if (glut_start_step < 2) return;
-
     if (key >= GLUT_KEY_F1 && key < GLUT_KEY_F1 + DisplayFlag::Nflag)
     {
         DisplayFlag::DisplayMode mode = (DisplayFlag::DisplayMode) (key-GLUT_KEY_F1);
-        switchFlag(mode);
-//        glutPostRedisplay();
+        if (displayFlag.isActive(mode)) displayFlag.flag &= ~(1<<mode);
+        else displayFlag.flag |= (1<<mode);
         return;
     }
 
     switch (key)
     {
     case GLUT_KEY_UP:
-        simulation.translateCamera(0,10);
+        simulation->translateCamera(0,10);
 //        glutPostRedisplay();
         break;
     case GLUT_KEY_DOWN:
-        simulation.translateCamera(0,-10);
+        simulation->translateCamera(0,-10);
 //        glutPostRedisplay();
         break;
     case GLUT_KEY_LEFT:
-        simulation.translateCamera(50,0);
+        simulation->translateCamera(50,0);
 //        glutPostRedisplay();
         break;
     case GLUT_KEY_RIGHT:
-        simulation.translateCamera(-50,0);
+        simulation->translateCamera(-50,0);
 //        glutPostRedisplay();
         break;
     case GLUT_KEY_PAGE_UP:
-        simulation.rotateCamera(0,25);
+        simulation->rotateCamera(0,25);
 //        glutPostRedisplay();
         break;
     case GLUT_KEY_PAGE_DOWN:
-        simulation.rotateCamera(0,-25);
+        simulation->rotateCamera(0,-25);
 //        glutPostRedisplay();
         break;
     default:

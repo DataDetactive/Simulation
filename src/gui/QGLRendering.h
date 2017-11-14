@@ -51,18 +51,18 @@
 #ifndef QGLRENDERING_H
 #define QGLRENDERING_H
 
-#include <QGLWidget>
+#include <QtOpenGL>
 #include "MainWindows.h"
 #include <gui/Simulation.h>
 
 //! [0]
-class QGLRendering : public QGLWidget
+class QGLRendering : public QOpenGLWidget
 {
-    Q_OBJECT
-
 public:
 
     QGLRendering(MainWindow * mw);
+
+    virtual ~QGLRendering() {}
 
     void initializeGL();
 
@@ -70,6 +70,7 @@ public:
 
     void resizeGL(int width, int height);
 
+private:
     MainWindow * main_mindow;
 };
 //! [0]

@@ -717,6 +717,24 @@ real invertMatrix(Mat<4,4,real>& dest, const Mat<4,4,real>& from) {
 
     }
 
+#undef MAT
+#undef m11
+#undef m12
+#undef m13
+#undef m14
+#undef m21
+#undef m22
+#undef m23
+#undef m24
+#undef m31
+#undef m32
+#undef m33
+#undef m34
+#undef m41
+#undef m42
+#undef m43
+#undef m44
+
     return(det);
 }
 

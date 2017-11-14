@@ -13,7 +13,10 @@ set(HEADER_FILES
     src/core/Data.h
     src/core/Factory.h
     src/core/Visitor.h
+    src/gui/Gui.h
     src/gui/glut_methods.h
+    src/gui/MainWindows.h
+    src/gui/QGLRendering.h
     src/gui/Simulation.h
     src/topology/Topology.h
     src/loader/Loader.h
@@ -54,6 +57,8 @@ set(SOURCE_FILES
     src/core/Node.cpp
     src/core/Data.cpp
     src/gui/glut_methods.cpp
+    src/gui/MainWindows.cpp
+    src/gui/QGLRendering.cpp
     src/gui/Simulation.cpp
     src/loader/Loader.cpp
     src/loader/MeshGmshLoader.cpp
@@ -83,6 +88,8 @@ set(OTHER_FILES
     data/config.xml
 )
 
+find_package(Qt5Core REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
 
@@ -96,5 +103,5 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${OTHER_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-DPLUGIN_DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\"")
 
-target_link_libraries(${PROJECT_NAME} glut GL GLU dl GLEW png xml2 microSofaImpl)
+target_link_libraries(${PROJECT_NAME} glut GL GLU dl GLEW png xml2 microSofaImpl Qt5::Core Qt5::OpenGL)
 
