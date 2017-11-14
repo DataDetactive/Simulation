@@ -20,8 +20,6 @@ public:
 
     void solve(TVecId x, TVecId b);
 
-    void draw(DisplayFlag flag);
-
 private :
     MechanicalParams m_params;
 

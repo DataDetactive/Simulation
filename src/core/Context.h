@@ -22,11 +22,6 @@ public :
     //Get Parent of the Context
     virtual Context * getParent()  = 0;
 
-    //Return the boundaing box
-    BoundingBox getBBox() {
-        return m_bbox;
-    }
-
     //Return a pointer on the context of the child object with name name
     virtual Context * getChild(std::string name) = 0;
 
@@ -45,10 +40,6 @@ public :
 
     //return a pointer to the topology of the context (direct access)
     virtual Topology * getTopology() = 0;
-
-
-protected :
-    BoundingBox m_bbox;
 
 };
 

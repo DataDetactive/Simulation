@@ -30,7 +30,7 @@ public:
 
     virtual void draw(DisplayFlag flag) {}
 
-    virtual void computeBBox(BoundingBox & bbox) {}
+    virtual void computeBBox(BoundingBox & /*boox*/) {}
 
     virtual void setAttribute(const char * name,const char * value) {
         std::map<std::string,BaseData *>::iterator it = m_data.find(std::string(name));

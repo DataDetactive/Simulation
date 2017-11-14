@@ -6,14 +6,14 @@
 #include <Sofa/Mat.h>
 #include <dataStructures.h>
 #include <core/Node.h>
-#include <GL/glew.h>
-#include <GL/gl.h>
 #include <animationloop/AnimationLoop.h>
 #include <state/State.h>
 #include <core/Visitor.h>
 #include <libxml/xmlreader.h>
 #include <constraint/Constraint.h>
+#include <constraint/PositionConstraint.h>
 #include <forcefield/ForceField.h>
+#include <forcefield/SpringForceField.h>
 
 class PickingVisitor : public Visitor {
 public:
@@ -73,78 +73,20 @@ private :
     TVec3 m_picked_dir;
 };
 
-class PickingConstraint : public Constraint {
+class ComputeBBoxVisitor : public Visitor {
 public:
-
-    PickingConstraint() {
-        d_name.setValue("PickingConstraint");
-        m_indice = -1;
+    bool processObject(BaseObject * o) {
+        o->computeBBox(m_bbox);
+        return true;
     }
 
-    void applyConstraint(TVecId vf) {
-        if (m_indice == -1) return;
-
-        std::vector<TVec3> & pos = this->getContext()->getMstate()->get(VecID::position);
-        std::vector<TVec3> & f = this->getContext()->getMstate()->get(vf);
-
-        f[m_indice] = TVec3();
-        pos[m_indice] = m_position;
+    BoundingBox get(Context * c) {
+        this->execute(c);
+        return m_bbox;
     }
 
-    void draw(DisplayFlag /*flag*/) {
-        if (m_indice == -1) return;
-        if (this->getContext() == NULL) return;
-
-        std::vector<TVec3> & pos = this->getContext()->getMstate()->get(VecID::position);
-
-        TVec3 p1 = pos[m_indice];
-
-        glColor3f(1.0f,0.4f,0.4f);
-        glPointSize(10);
-        glBegin(GL_POINTS);
-            glVertex3fv(p1.ptr());
-        glEnd();
-        glPointSize(1);
-    }
-
-    int m_indice;
-    TVec3 m_position;
-};
-
-class PickingForceField :  public ForceField {
-public:
-
-    PickingForceField() {
-        d_name.setValue("PickingForceField");
-        m_indice  = -1;
-        m_force = TVec3(0,0,0);
-        m_stiffness = (double) 20.0;
-    }
-
-    void addForce(TVecId f) {
-        this->getContext()->getMstate()->get(f)[m_indice] += m_force * m_stiffness;
-    }
-
-    void draw(DisplayFlag flag) {
-        if (m_indice == -1) return;
-        if (this->getContext() == NULL) return;
-
-        std::vector<TVec3> & pos = this->getContext()->getMstate()->get(VecID::position);
-
-        TVec3 p1 = pos[m_indice];
-        TVec3 p2 = p1 + m_force;
-
-        glLineWidth(3);
-        glBegin(GL_LINES);
-        glColor3f(0.8f,0.2f,0.2f); glVertex3fv(p1.ptr());
-        glColor3f(1.0f,0.6f,0.6f); glVertex3fv(p2.ptr());
-        glEnd(); // GL_LINES
-        glLineWidth(1);
-    }
-
-    int m_indice;
-    TVec3 m_force;
-    double m_stiffness;
+private :
+    BoundingBox m_bbox;
 
 };
 
@@ -154,11 +96,11 @@ public:
 
     bool read_scene(const char * filename);
 
-    void initgl();
+    void init();
 
-    void step(double ell);
+    void step();
 
-    void render();
+    void render(DisplayFlag displayFlag);
 
     void reset_camera();
 
@@ -180,21 +122,11 @@ public:
 
     void stopConstraintPicking();
 
-    double getFPS();
-
     double getSize();
 
     double getPickingStiffness();
 
     void addPickingStiffness(double s);
-
-    const char * getDeviceName();
-
-    void  setDeviceName(std::string name);
-
-    void switchFlag(DisplayFlag::DisplayMode flag);
-
-    DisplayFlag getDisplayFlag();
 
 private:
     TVec3 camera_lookat;
@@ -209,28 +141,16 @@ private:
     TColor light0_color;
     TColor light1_color;
 
-
     TVec3 picked_origin;
     TVec3 picked_dir;
 
-    GLUquadric* pGLUquadric = NULL;
     Node * main_Node;
 
-    int anim_iteration;
-    int iter_last_time;
-    double fps;
-    double mean_fps;
+    double m_time;
+    BoundingBox m_bbox;
 
-    DisplayFlag m_displayFlag;
-
-    enum { FPS_ITERATIONS=100 };
-    enum { FPS_SAMPLES=10 };
-    double iter_time_buffer[FPS_SAMPLES];
-
-    std::string device_name;
-
-    PickingForceField pickingForceField;
-    PickingConstraint pickingConstraint;
+    SpringForceField pickingForceField;
+    PositionConstraint pickingConstraint;
 
     void update_picking_org(int x, int y);
     void updatePickingForce();

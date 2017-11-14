@@ -18,33 +18,15 @@ Node::Node()
 }
 
 void Node::init() {
-
-
     for (unsigned i=0;i<m_childs.size();i++) {
         m_childs[i]->init();
     }
-
-    m_bbox.min = TVec3(std::numeric_limits<TReal>::max(),std::numeric_limits<TReal>::max(),std::numeric_limits<TReal>::max());
-    m_bbox.max = TVec3(std::numeric_limits<TReal>::min(),std::numeric_limits<TReal>::min(),std::numeric_limits<TReal>::min());
-
-    computeBBox(m_bbox);
 }
 
-void Node::computeBBox(BoundingBox & bbox) {
-    m_bbox.min = bbox.min;
-    m_bbox.max = bbox.max;
-
+void Node::computeBBox(BoundingBox & min_bbox) {
     for (unsigned i=0;i<m_childs.size();i++) {
-        m_childs[i]->computeBBox(m_bbox);
+        m_childs[i]->computeBBox(min_bbox);
     }
-
-    if (m_bbox.min[0] < bbox.min[0]) bbox.min[0] = m_bbox.min[0];
-    if (m_bbox.min[1] < bbox.min[1]) bbox.min[1] = m_bbox.min[1];
-    if (m_bbox.min[2] < bbox.min[2]) bbox.min[2] = m_bbox.min[2];
-
-    if (m_bbox.max[0] > bbox.max[0]) bbox.max[0] = m_bbox.max[0];
-    if (m_bbox.max[1] > bbox.max[1]) bbox.max[1] = m_bbox.max[1];
-    if (m_bbox.max[2] > bbox.max[2]) bbox.max[2] = m_bbox.max[2];
 }
 
 State * Node::getMstate() {

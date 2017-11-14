@@ -5,6 +5,7 @@
 #include <Sofa/Mat.h>
 #include <string>
 #include <vector>
+#include <limits>
 
 typedef float TReal;
 typedef sofa::defaulttype::Vec<3,TReal> TVec3;
@@ -31,6 +32,11 @@ struct BoundingBox
 {
     TVec3 min;
     TVec3 max;
+
+    BoundingBox() {
+        min = TVec3(std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
+        max = TVec3(std::numeric_limits<double>::min(),std::numeric_limits<double>::min(),std::numeric_limits<double>::min());
+    }
 };
 
 typedef struct DisplayFlag_s {

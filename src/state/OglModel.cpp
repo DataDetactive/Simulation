@@ -11,6 +11,7 @@
 #include <core/Context.h>
 #include <visual/OglTexture.h>
 #include <visual/Visual.h>
+#include <visual/OglShader.h>
 
 OglModel::OglModel()
 : d_color("color",TVec3(1,1,1),this)
@@ -20,140 +21,12 @@ OglModel::OglModel()
 {}
 
 void OglModel::init() {
-
     //for wireframe
     std::vector<TTriangle> & triangles = this->getContext()->getTopology()->getTriangles();
     for (unsigned i=0;i<triangles.size();i++) {
         lines.push_back(TLine(triangles[i][0],triangles[i][1]));
         lines.push_back(TLine(triangles[i][0],triangles[i][2]));
         lines.push_back(TLine(triangles[i][1],triangles[i][2]));
-    }
-
-    shaders_reload();
-}
-
-
-
-std::string OglModel::loadTextFile(const std::string& filename)
-{
-    // Open the file passed in
-    std::ifstream fin(filename.c_str());
-
-    // Make sure we opened the file correctly
-    if(!fin) {
-        std::cerr << "Error OglModel " << this->getName() << " cannot find shader " << filename << std::endl;
-        return "";
-    }
-
-    std::string strLine = "";
-    std::string strText = "";
-
-    // Go through and store each line in the text file within a "string" object
-    while(std::getline(fin, strLine))
-    {
-        strText += "\n" + strLine;
-    }
-
-    // Close our file
-    fin.close();
-
-    // Return the text file's data
-    return strText;
-}
-
-GLint OglModel::loadShader(GLint target, const std::string& filename)
-{
-    std::string source = loadTextFile(filename);
-    if (source.empty()) return -1;
-
-    GLint shader = glCreateShaderObjectARB(target);
-    const char* src = source.c_str();
-    glShaderSourceARB(shader, 1, &src, NULL);
-    glCompileShaderARB(shader);
-
-    GLint compiled = 0, length = 0, laux = 0;
-    glGetObjectParameterivARB(shader, GL_OBJECT_COMPILE_STATUS_ARB, &compiled);
-    if (!compiled) std::cerr << "ERROR: Compilation of "<<filename<<" shader failed:"<<std::endl;
-//    else std::cout << "Compilation of "<<filename<<" shader OK" << std::endl;
-
-    glGetObjectParameterivARB(shader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &length);
-    if (length > 1)
-    {
-        GLcharARB *logString = (GLcharARB *)malloc((length+1) * sizeof(GLcharARB));
-        glGetInfoLogARB(shader, length, &laux, logString);
-        std::cerr << logString << std::endl;
-        free(logString);
-    }
-
-    return shader;
-}
-
-void OglModel::shaders_reload()
-{
-//    if (!d_use_shaders.getValue())
-//    {
-//        std::cout << "Shaders disabled" << std::endl;
-//        return;
-//    }
-
-//    if (m_textureNormal == 0)
-//    {
-//        std::cout << "No normalmap texture" << std::endl;
-//        return;
-//    }
-
-
-    GLint oldShaderVertex = m_shaderVertex;
-    GLint oldShaderFragment = m_shaderFragment;
-    GLint oldShaderProgram = m_shaderProgram;
-    m_shaderVertex = loadShader(GL_VERTEX_SHADER_ARB, getFullPath(d_shaderVertex.getValue().c_str()));
-    m_shaderFragment = loadShader(GL_FRAGMENT_SHADER_ARB, getFullPath(d_shaderFragment.getValue().c_str()));
-    if (m_shaderVertex == -1 || m_shaderFragment == -1) return;
-
-    if (m_shaderVertex && m_shaderFragment)
-    {
-        m_shaderProgram = glCreateProgramObjectARB();
-        /* use program object */
-        glAttachObjectARB(m_shaderProgram, m_shaderVertex);
-        glAttachObjectARB(m_shaderProgram, m_shaderFragment);
-
-        /* link */
-        glLinkProgramARB(m_shaderProgram);
-        GLint status = 0, length = 0, laux = 0;
-        glGetObjectParameterivARB(m_shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &status);
-        if (!status) std::cerr << "ERROR: Link of shaders failed:"<<std::endl;
-//        else std::cout << "Link of shaders OK" << std::endl;
-        glGetObjectParameterivARB(m_shaderProgram, GL_OBJECT_INFO_LOG_LENGTH_ARB, &length);
-        if (length > 1)
-        {
-            GLcharARB *logString = (GLcharARB *)malloc((length+1) * sizeof(GLcharARB));
-            glGetInfoLogARB(m_shaderProgram, length, &laux, logString);
-            std::cerr << logString << std::endl;
-            free(logString);
-        }
-        if (!status) m_shaderProgram = 0;
-    }
-    if (m_shaderProgram) // load successfull
-    {
-        if (oldShaderVertex) glDeleteObjectARB(oldShaderVertex);
-        if (oldShaderFragment) glDeleteObjectARB(oldShaderFragment);
-        if (oldShaderProgram) glDeleteObjectARB(oldShaderProgram);
-        glUseProgramObjectARB(m_shaderProgram);
-        m_shaderTangentAttrib = glGetAttribLocationARB(m_shaderProgram,"tangent");
-        m_shaderColorMap = glGetUniformLocationARB(m_shaderProgram,"planarTexture");
-        m_shaderNormalMap = glGetUniformLocationARB(m_shaderProgram,"normalMap");
-        glUniform1iARB(m_shaderColorMap,0);
-        glUniform1iARB(m_shaderNormalMap,1);
-        glUseProgramObjectARB(0);
-    }
-    else // keep previous
-    {
-        if (m_shaderVertex) glDeleteObjectARB(m_shaderVertex);
-        m_shaderVertex = oldShaderVertex;
-        if (m_shaderFragment) glDeleteObjectARB(m_shaderFragment);
-        m_shaderFragment = oldShaderFragment;
-        if (m_shaderProgram) glDeleteObjectARB(m_shaderProgram);
-        m_shaderProgram = oldShaderProgram;
     }
 }
 
@@ -211,6 +84,25 @@ void OglModel::draw(DisplayFlag flag) {
     std::vector<TTexCoord> & textures = this->getContext()->getTopology()->getTextures();
     GLint textureColor = FindTextureIdVisitor(TEXTURE_COLOR).find(this->getContext());
     GLint textureNormal = FindTextureIdVisitor(TEXTURE_NORMAL).find(this->getContext());
+
+
+    GLint m_shaderVertex = -1;
+    GLint m_shaderFragment = -1;
+    GLint m_shaderProgram = -1;
+    GLint m_shaderTangentAttrib = -1;
+    GLint m_shaderColorMap = -1;
+    GLint m_shaderNormalMap = -1;
+
+    OglShader * shader = FindVisitor<OglShader>::find(this->getContext());
+
+    if (shader != NULL) {
+        m_shaderVertex = shader->getShaderVertex();
+        m_shaderFragment = shader->getShaderFragment();
+        m_shaderProgram = shader->getShaderProgram();
+        m_shaderTangentAttrib = shader->getShaderTangentAttrib();
+        m_shaderColorMap = shader->getShaderColorMap();
+        m_shaderNormalMap = shader->getShaderNormalMap();
+    }
 
     glEnable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);

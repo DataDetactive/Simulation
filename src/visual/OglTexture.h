@@ -6,10 +6,7 @@
 #include <dataStructures.h>
 #include <vector>
 #include <topology/Topology.h>
-#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
 typedef enum {
     TEXTURE_COLOR,

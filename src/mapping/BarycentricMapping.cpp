@@ -3,10 +3,7 @@
 #include <loader/Loader.h>
 #include <core/Visitor.h>
 #include <state/State.h>
-#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
 void BarycentricMapping::init() {
     Mapping::init();
@@ -15,7 +12,7 @@ void BarycentricMapping::init() {
     if (m_stateTo == NULL) return;
 
     // we need the topology of the mstateFrom, we exectute a visitor from the context of the mstateFrom
-    m_topology = FindVisitor<Topology>().find(m_stateFrom->getContext());
+    m_topology = FindVisitor<Topology>::find(m_stateFrom->getContext());
     if (m_topology == NULL) {
         std::cerr << "Error BarycentricMapping " << this->getName() << " cannot find topology from mstate " << m_stateFrom->getName() << std::endl;
         return;

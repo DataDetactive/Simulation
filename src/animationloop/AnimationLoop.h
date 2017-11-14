@@ -8,14 +8,7 @@
 class AnimationLoop : public BaseObject {
 public:
 
-    AnimationLoop() {
-        m_time = 0.0;
-    }
-
-    virtual void step() = 0;
-
-protected:
-    double m_time;
+    virtual void step(double time) = 0;
 
 };
 #endif

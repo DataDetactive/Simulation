@@ -45,9 +45,10 @@ public:
         return m_object;
     }
 
-    T * find(Context * c) {
-        c->processVisitor(*this);
-        return getObject();
+    static T * find(Context * c) {
+        FindVisitor<T> visitor;
+        visitor.execute(c);
+        return visitor.getObject();
     }
 
 public:

@@ -2,45 +2,24 @@
 #include <iostream>
 #include <fstream>
 #include <animationloop/DefaultAnimationLoop.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
 
 Simulation::Simulation() {
     light_ambient = TColor(0.2f, 0.2f, 0.2f, 1.0f);
     light0_color = TColor(0.75f, 0.75f, 0.9f, 1.0f);
     light1_color = TColor(0.4f, 0.4f ,0.4f ,1.0f);
 
-    pGLUquadric = NULL;
-
+    m_time = 0;
     main_Node = NULL;
-
-    anim_iteration = 0;
-    iter_last_time = 0;
-
-    mean_fps = 0;
-
-    m_displayFlag.flag = 0;
-    switchFlag(DisplayFlag::STATS);
-    switchFlag(DisplayFlag::VISUAL);
-}
-
-
-void Simulation::setDeviceName(std::string name) {
-    device_name = name;
-}
-
-const char * Simulation::getDeviceName() {
-    return device_name.c_str();
 }
 
 double Simulation::getPickingStiffness() {
-    return pickingForceField.m_stiffness;
+    return pickingForceField.d_stiffness.getValue();
 }
 
 void Simulation::addPickingStiffness(double a) {
-    pickingForceField.m_stiffness += a;
-}
-
-DisplayFlag Simulation::getDisplayFlag() {
-    return m_displayFlag;
+    pickingForceField.d_stiffness.setValue(pickingForceField.d_stiffness.getValue() + a);
 }
 
 bool Simulation::read_scene(const char * fn) {
@@ -144,23 +123,21 @@ bool Simulation::processNode(Node * node,xmlTextReaderPtr reader) {
     return true;
 }
 
-double Simulation::getFPS() {
-    return fps;
-}
 
-void Simulation::initgl()
+void Simulation::init()
 {
     main_Node->init();
 
-    BoundingBox bbox = main_Node->getBBox();
-    TReal simulation_size = (bbox.max-bbox.min).norm();
-    TVec3 simulation_center = (bbox.min + bbox.max) * 0.5f;
+    m_bbox = ComputeBBoxVisitor().get(main_Node);
+
+    TReal simulation_size = (m_bbox.max-m_bbox.min).norm();
+    TVec3 simulation_center = (m_bbox.min + m_bbox.max) * 0.5f;
 
     light0_position = simulation_center + TVec3(0.0f,2.0f,0.0f)*simulation_size; light0_position[3] = 1;
     light1_position = simulation_center + TVec3(3.0f,-0.5f,-1.0f)*simulation_size; light1_position[3] = 1;
     reset_camera();
 
-    pGLUquadric = gluNewQuadric();
+//    pGLUquadric = gluNewQuadric();
 
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1);
@@ -209,45 +186,28 @@ void Simulation::initgl()
 }
 
 
-void Simulation::step(double t) {
-    if (anim_iteration % FPS_ITERATIONS == 0) {
-
-        if (anim_iteration > 0) {
-            double dt = t - iter_last_time;
-            fps = (FPS_ITERATIONS*1000) / dt;
-            int s = (anim_iteration/FPS_ITERATIONS);
-            iter_time_buffer[(s-1) % FPS_SAMPLES] = dt;
-            int ns = (s >= FPS_SAMPLES) ? FPS_SAMPLES : s;
-            double ttotal = 0;
-            for (int i = s-ns; i < s; ++i)
-                ttotal += iter_time_buffer[i % FPS_SAMPLES];
-            mean_fps = (ns * FPS_ITERATIONS * 1000) / ttotal;
-
-        }
-        iter_last_time = t;
-    }
-
+void Simulation::step() {
     updatePickingForce();
 
-    AnimationLoop * anim = FindVisitor<AnimationLoop>().find(main_Node);
+    AnimationLoop * anim = FindVisitor<AnimationLoop>::find(main_Node);
     if (anim == NULL) {
         anim = new DefaultAnimationLoop();
         main_Node->attach(anim);
     }
 
-    anim->step();
+    m_time += main_Node->getDt();
+    anim->step(m_time);
 
-    ++anim_iteration;
+
 }
 
 double Simulation::getSize() {
-    BoundingBox bbox = main_Node->getBBox();
-    return (bbox.max-bbox.min).norm();
+    return (m_bbox.max-m_bbox.min).norm();
 }
 
 //// MAIN METHOD ////
 
-void Simulation::render()
+void Simulation::render(DisplayFlag displayFlag)
 {
     camera_position = camera_lookat + camera_direction * camera_distance;
     glMatrixMode   ( GL_MODELVIEW );  // Select The Model View Matrix
@@ -261,20 +221,13 @@ void Simulation::render()
 
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    main_Node->draw(m_displayFlag);
-}
-
-void Simulation::switchFlag(DisplayFlag::DisplayMode mode) {
-    if (m_displayFlag.isActive(mode)) m_displayFlag.flag &= ~(1<<mode);
-    else m_displayFlag.flag |= (1<<mode);
+    main_Node->draw(displayFlag);
 }
 
 void Simulation::reset_camera()
 {
-    BoundingBox bbox = main_Node->getBBox();
-
-    TReal simulation_size = (bbox.max-bbox.min).norm();
-    TVec3 simulation_center = (bbox.min + bbox.max) * 0.5f;
+    TReal simulation_size = (m_bbox.max-m_bbox.min).norm();
+    TVec3 simulation_center = (m_bbox.min + m_bbox.max) * 0.5f;
 
     camera_lookat = simulation_center;
     camera_lookat[2] += simulation_size*0.1f;
@@ -312,11 +265,13 @@ void Simulation::zoomCamera(int dx,int dy) {
 }
 
 void Simulation::updatePickingForce() {
-    if (pickingForceField.getContext() != NULL) {
-        const std::vector<TVec3> & pos = pickingForceField.getContext()->getMstate()->get(VecID::position);
-        TVec3 particle = pos[pickingForceField.m_indice];
-        pickingForceField.m_force = picked_origin + picked_dir * dot(particle-picked_origin, picked_dir) - particle;
-    }
+    if (pickingForceField.getContext() == NULL) return;
+
+    const std::vector<TVec3> & pos = pickingForceField.getContext()->getMstate()->get(VecID::position);
+    if (pickingForceField.d_index.getValue() == -1) return;
+
+    TVec3 particle = pos[pickingForceField.d_index.getValue()];
+    pickingForceField.d_force.setValue(picked_origin + picked_dir * dot(particle-picked_origin, picked_dir) - particle);
 }
 
 void Simulation::updatePickingForce(int x,int y) {
@@ -326,12 +281,12 @@ void Simulation::updatePickingForce(int x,int y) {
 
 void Simulation::updatePickingConstraint(int x,int y) {
     update_picking_org(x,y);
+    if (pickingConstraint.getContext() == NULL) return;
+    if (pickingConstraint.d_index.getValue() == -1) return;
 
-    if (pickingConstraint.getContext() != NULL) {
-        const std::vector<TVec3> & pos = pickingConstraint.getContext()->getMstate()->get(VecID::position);
-        TVec3 particle = pos[pickingConstraint.m_indice];
-        pickingConstraint.m_position = picked_origin + picked_dir * dot(particle-picked_origin, picked_dir);
-    }
+    const std::vector<TVec3> & pos = pickingConstraint.getContext()->getMstate()->get(VecID::position);
+    TVec3 particle = pos[pickingConstraint.d_index.getValue()];
+    pickingConstraint.d_position.setValue(picked_origin + picked_dir * dot(particle-picked_origin, picked_dir));
 }
 
 void Simulation::startForcePicking(int x,int y) {
@@ -343,13 +298,13 @@ void Simulation::startForcePicking(int x,int y) {
 
     Node * node = dynamic_cast<Node *>(v.getPickedState()->getContext());
     node->attach(&pickingForceField);
-    pickingForceField.m_indice = v.getIndice();
-    pickingForceField.m_force = TVec3();
+    pickingForceField.d_index.setValue(v.getIndice());
+    pickingForceField.d_force.setValue(TVec3());
 }
 
 void Simulation::stopForcePicking() {
     if (pickingForceField.getContext() == NULL) return;
-    pickingForceField.m_indice = -1;
+    pickingForceField.d_index.setValue(-1);
     Node * node = dynamic_cast<Node *>(pickingForceField.getContext());
     node->detach(&pickingForceField);
 }
@@ -361,7 +316,7 @@ void Simulation::startConstraintPicking(int x,int y) {
     main_Node->processVisitor(v);
     if (v.getPickedState() == NULL) {
         if (pickingConstraint.getContext() == NULL) return;
-        pickingConstraint.m_indice = -1;
+        pickingConstraint.d_index.setValue(-1);
         Node * node = dynamic_cast<Node *>(pickingConstraint.getContext());
         node->detach(&pickingConstraint);
 
@@ -372,8 +327,8 @@ void Simulation::startConstraintPicking(int x,int y) {
 
     Node * node = dynamic_cast<Node *>(v.getPickedState()->getContext());
     node->attach(&pickingConstraint);
-    pickingConstraint.m_indice = v.getIndice();
-    pickingConstraint.m_position = pos[v.getIndice()];
+    pickingConstraint.d_index.setValue(v.getIndice());
+    pickingConstraint.d_position.setValue(pos[v.getIndice()]);
 }
 
 void Simulation::stopConstraintPicking() {

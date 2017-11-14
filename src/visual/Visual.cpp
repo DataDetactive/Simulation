@@ -2,9 +2,7 @@
 
 VisualSofa::VisualSofa()
 : d_id("id","",this)
-, d_value("value","",this)
-, d_shaderVertex("vertFilename","",this)
-, d_shaderFragment("fragFilename","",this) {
+, d_value("value","",this) {
 
 }
 
@@ -19,7 +17,6 @@ GLenum myglType<double>() {
 }
 
 
-DECLARE_ALIAS(OglShader,VisualSofa)
 DECLARE_ALIAS(OglFloatVariable,VisualSofa)
 DECLARE_ALIAS(OglFloat2Variable,VisualSofa)
 DECLARE_ALIAS(OglShaderDefineMacro,VisualSofa)

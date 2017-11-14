@@ -23,8 +23,10 @@ set(HEADER_FILES
     src/forcefield/ForceField.h
     src/forcefield/UniformMass.h
     src/forcefield/TetrahedronFEMForceField.h
+    src/forcefield/SpringForceField.h
     src/constraint/Constraint.h
     src/constraint/BoxConstraint.h
+    src/constraint/PositionConstraint.h
     src/state/State.h
     src/state/OglModel.h
     src/integrator/Integrator.h
@@ -38,6 +40,7 @@ set(HEADER_FILES
     src/animationloop/DefaultAnimationLoop.h
     src/visual/OglTexture.h
     src/visual/Visual.h
+    src/visual/OglShader.h
     src/Sofa/Vec.h
     src/Sofa/Mat.h
     src/Sofa/fixed_array.h
@@ -59,7 +62,9 @@ set(SOURCE_FILES
     src/topology/Topology.cpp
     src/forcefield/UniformMass.cpp
     src/forcefield/TetrahedronFEMForceField.cpp
+    src/forcefield/SpringForceField.cpp
     src/constraint/BoxConstraint.cpp
+    src/constraint/PositionConstraint.cpp
     src/state/State.cpp
     src/state/OglModel.cpp
     src/integrator/EulerExplicit.cpp
@@ -69,6 +74,7 @@ set(SOURCE_FILES
     src/solver/CGLinearSolver.cpp
     src/visual/OglTexture.cpp
     src/visual/Visual.cpp
+    src/visual/OglShader.cpp
     src/main.cpp
 )
 

@@ -4,10 +4,7 @@
 #include <core/BaseObject.h>
 #include <dataStructures.h>
 #include <state/State.h>
-#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
 Topology::Topology()
 : d_src("src","",this)

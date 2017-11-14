@@ -2,10 +2,7 @@
 #include <constraint/BoxConstraint.h>
 #include <topology/Topology.h>
 #include <state/State.h>
-#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 #include <iostream>
 #include <stdarg.h>
 #include <stdio.h>

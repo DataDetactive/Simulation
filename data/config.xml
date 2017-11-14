@@ -20,14 +20,14 @@
                         <MeshVTKLoader name="loader" filename="liver-smooth.vtk" />
                         <TriangleSetTopologyContainer name="triTopo" src="@loader" />
 
-                        <OglShader vertFilename="shaders/generalRenderingShader.vert" fragFilename="shaders/generalRenderingShader.frag"/>
+                        <OglShader vertFilename="shaders/bumpVertexShader.glsl" fragFilename="shaders/bumpFragmentShader.glsl"/>
                         <OglShaderDefineMacro id="TRI_TEXTURING" />
                         <OglShaderDefineMacro id="TRI_TEXTURING_SINGLE_TEXTURE" />
                         <OglShaderDefineMacro id="PHONG" />
                         <OglShaderDefineMacro id="BUMP_MAPPING" />
                         <OglFloat2Variable name="scaleTexture" id="scaleTexture" value="2 2" />
                         <OglFloatVariable name="bumpFactor" id="bumpFactor" value="1" />
-                        
+
                         <OglTexture id="planarTexture" textureFilename="liver-cyrrhosis.png" textureUnit="1" repeat="true"/>
                         <OglTexture id="normalMap" textureFilename="liver-cyrrhosis-NM.png" textureUnit="2" repeat="true"/>
 

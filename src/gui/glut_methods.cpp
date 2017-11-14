@@ -41,8 +41,62 @@ float drawText_lineH = 15;
 float drawText_alignH = 0;
 float drawText_alignV = 0;
 
+DisplayFlag displayFlag;
+std::string device_name;
+
+int anim_iteration;
+int iter_last_time;
+double fps;
+double mean_fps;
+
+enum { FPS_ITERATIONS=100 };
+enum { FPS_SAMPLES=10 };
+double iter_time_buffer[FPS_SAMPLES];
+
+
+static void cpuid(unsigned int a, unsigned int b[4])
+{
+    asm volatile("xchgl %%ebx, %1\n"
+                 "cpuid\n"
+                 "xchgl %%ebx, %1\n"
+                 :"=a"(*b),"=r"(*(b+1)),
+                 "=c"(*(b+2)),"=d"(*(b+3)):"0"(a));
+}
+
+std::string cpu_name()
+{
+    unsigned int b[13] = {0};
+    cpuid(0x80000000,b);
+    unsigned int max = b[0];
+    if (max < 0x80000004) return std::string();
+    cpuid(0x80000002,b);
+    cpuid(0x80000003,b+4);
+    cpuid(0x80000004,b+8);
+    std::string s;
+    b[12] = 0;
+    const char* p = (const char*)b;
+    char last = '\0';
+    while (*p)
+    {
+        char c = *p; ++p;
+        if (c == ' ' && last == ' ') continue;
+        if (c == '(')
+        {
+            while (*p && c != ')') c = *p++;
+            continue;
+        }
+        s += c; last = c;
+    }
+    return s;
+}
 void init_glut(int* argc, char** argv)
 {
+    displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
+
+    std::ostringstream o;
+    o << "CPU: " << cpu_name();
+    device_name = o.str();
+
     if (glut_start_step > 0) return;
     glutInit(argc, argv);
     glutInitWindowSize(window_width, window_height);
@@ -80,7 +134,7 @@ void setup_glut()
 {
     if (glut_start_step != 1) return;
     glut_start_step = 2;
-    simulation.initgl();
+    simulation.init();
     reshape(window_width, window_height);
     glutSetWindowTitle(pause_animation ? title_paused : title_active);
 }
@@ -108,9 +162,9 @@ void display()
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     if (glut_start_step >= 2)
     {
-        simulation.render();
+        simulation.render(displayFlag);
 
-        if (simulation.getDisplayFlag().isActive(DisplayFlag::STATS)) {
+        if (displayFlag.isActive(DisplayFlag::STATS)) {
             glDisable(GL_DEPTH_TEST);
 
             glMatrixMode(GL_PROJECTION);
@@ -140,8 +194,8 @@ void display()
             }
 
             drawTextPos(10,20);
-            drawTextF("FPS: %.1f",simulation.getFPS());
-            drawTextF("%s",simulation.getDeviceName());
+            drawTextF("FPS: %.1f",fps);
+            drawTextF("%s",device_name.c_str());
             drawTextF("Picking Stiffness: %.1f",simulation.getPickingStiffness());
             drawTextF("");
 
@@ -169,7 +223,29 @@ void idle()
 
     if (glut_start_step < 2) return;
 
-    if (!pause_animation) simulation.step(glutGet(GLUT_ELAPSED_TIME));
+    if (!pause_animation) {
+        double t = glutGet(GLUT_ELAPSED_TIME);
+
+        if (anim_iteration % FPS_ITERATIONS == 0) {
+            if (anim_iteration > 0) {
+                double dt = t - iter_last_time;
+                fps = (FPS_ITERATIONS*1000) / dt;
+                int s = (anim_iteration/FPS_ITERATIONS);
+                iter_time_buffer[(s-1) % FPS_SAMPLES] = dt;
+                int ns = (s >= FPS_SAMPLES) ? FPS_SAMPLES : s;
+                double ttotal = 0;
+                for (int i = s-ns; i < s; ++i)
+                    ttotal += iter_time_buffer[i % FPS_SAMPLES];
+                mean_fps = (ns * FPS_ITERATIONS * 1000) / ttotal;
+
+            }
+            iter_last_time = t;
+        }
+
+        simulation.step();
+
+        ++anim_iteration;
+    }
 
     glutPostRedisplay();
 }
@@ -279,9 +355,14 @@ void keyboard(unsigned char key, int /*x*/, int /*y*/)
         break;
     case 's': // STEP
         pause_animation = true;
-        simulation.step(glutGet(GLUT_ELAPSED_TIME));
+        simulation.step();
 //        glutPostRedisplay();
     }
+}
+
+void switchFlag(DisplayFlag::DisplayMode mode) {
+    if (displayFlag.isActive(mode)) displayFlag.flag &= ~(1<<mode);
+    else displayFlag.flag |= (1<<mode);
 }
 
 void special(int key, int /*x*/, int /*y*/)
@@ -291,7 +372,7 @@ void special(int key, int /*x*/, int /*y*/)
     if (key >= GLUT_KEY_F1 && key < GLUT_KEY_F1 + DisplayFlag::Nflag)
     {
         DisplayFlag::DisplayMode mode = (DisplayFlag::DisplayMode) (key-GLUT_KEY_F1);
-        simulation.switchFlag(mode);
+        switchFlag(mode);
 //        glutPostRedisplay();
         return;
     }

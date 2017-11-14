@@ -9,7 +9,6 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
 
 class OglModel : public State {
 public:
@@ -35,13 +34,6 @@ public:
     void updateNormals();
 
 protected:
-
-    GLint m_shaderVertex;
-    GLint m_shaderFragment;
-    GLint m_shaderProgram;
-    GLint m_shaderTangentAttrib;
-    GLint m_shaderColorMap;
-    GLint m_shaderNormalMap;
 
     std::vector<TVec3> m_normals;
     std::vector<TVec3> m_tangents;

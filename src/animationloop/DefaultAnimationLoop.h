@@ -6,9 +6,7 @@
 class DefaultAnimationLoop : public AnimationLoop {
 public:
 
-    void step();
-
-    void draw(DisplayFlag flag);
+    void step(double time);
 
 };
 #endif

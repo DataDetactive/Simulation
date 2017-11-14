@@ -1,8 +1,5 @@
 #include <loader/Loader.h>
-#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 #include <iostream>
 #include <stdarg.h>
 #include <stdio.h>
@@ -18,7 +15,7 @@ Loader::Loader()
 }
 
 void Loader::init() {
-    Topology * topo = FindVisitor<Topology>().find(this->getContext());
+    Topology * topo = FindVisitor<Topology>::find(this->getContext());
 
     if (topo == NULL) {
         std::cerr << "Error the loader " << this->getName() << " cannot find the topology" << std::endl;

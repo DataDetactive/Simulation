@@ -4,10 +4,6 @@
 #include <core/Visitor.h>
 #include <core/Context.h>
 #include <mapping/Mapping.h>
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
 State::State() {
     m_size = 0;
@@ -43,17 +39,17 @@ unsigned State::size() {
     return m_size;
 }
 
-void State::computeBBox(BoundingBox & bbox) {
+void State::computeBBox(BoundingBox & min_bbox) {
     std::vector<TVec3> & X = this->get(VecID::position);
 
     for (unsigned i=0;i<X.size();i++) {
-        if (X[i][0] < bbox.min[0]) bbox.min[0] = X[i][0];
-        if (X[i][1] < bbox.min[1]) bbox.min[1] = X[i][1];
-        if (X[i][2] < bbox.min[2]) bbox.min[2] = X[i][2];
+        if (X[i][0] < min_bbox.min[0]) min_bbox.min[0] = X[i][0];
+        if (X[i][1] < min_bbox.min[1]) min_bbox.min[1] = X[i][1];
+        if (X[i][2] < min_bbox.min[2]) min_bbox.min[2] = X[i][2];
 
-        if (X[i][0] > bbox.max[0]) bbox.max[0] = X[i][0];
-        if (X[i][1] > bbox.max[1]) bbox.max[1] = X[i][1];
-        if (X[i][2] > bbox.max[2]) bbox.max[2] = X[i][2];
+        if (X[i][0] > min_bbox.max[0]) min_bbox.max[0] = X[i][0];
+        if (X[i][1] > min_bbox.max[1]) min_bbox.max[1] = X[i][1];
+        if (X[i][2] > min_bbox.max[2]) min_bbox.max[2] = X[i][2];
     }
 }
 
