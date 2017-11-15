@@ -15,16 +15,18 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    gui = new GuiGlut();
-    gui->init(argc,argv);
-    return gui->run();
-
-
-//    QApplication app(argc, argv);
-//    gui = new MainWindow();
+//    gui = new GuiGlut();
 //    gui->init(argc,argv);
-//    ((MainWindow*) gui)->show();
-//    return app.exec();
+//    gui->run();
+
+
+    QApplication app(argc, argv);
+    gui = new MainWindow();
+    gui->init(argc,argv);
+    gui->run();
+    return app.exec();
+
+    return 0;
 }
 
 

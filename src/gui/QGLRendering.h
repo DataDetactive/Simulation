@@ -60,7 +60,7 @@ class QGLRendering : public QOpenGLWidget
 {
 public:
 
-    QGLRendering(MainWindow * mw);
+    QGLRendering(Gui * gui);
 
     virtual ~QGLRendering() {}
 
@@ -71,7 +71,7 @@ public:
     void resizeGL(int width, int height);
 
 private:
-    MainWindow * main_mindow;
+    Gui * m_gui;
 };
 //! [0]
 

@@ -54,6 +54,11 @@ typedef struct DisplayFlag_s {
         return flag & (1<<m);
     }
 
+    void switchMode(DisplayMode mode) {
+        if (isActive(mode)) flag &= ~(1<<mode);
+        else flag |= (1<<mode);
+    }
+
     int flag;
 } DisplayFlag;
 

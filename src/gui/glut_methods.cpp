@@ -11,28 +11,17 @@
 #include <stdio.h>
 
 
+GuiGlut * glut_gui = NULL;
 
-
-//// GLUT Methods ////
-
-TColor background_color = TColor(1.0f, 1.0f, 1.0f, 0.0f);
-
-int pause_animation = true;
-int camera_mode = -1;
-int window_width = 800;
-int window_height = 600;
 int winid = 0;
-//int menuid = 0;
 
 #if !defined(GLUT_WHEEL_UP)
 #  define GLUT_WHEEL_UP   3
 #  define GLUT_WHEEL_DOWN 4
 #endif
 
-int mouse_x = 0;
-int mouse_y = 0;
-
-int fullscreen = 0;
+bool fullscreen = false;
+int pause_animation = true;
 int prev_width = 800;
 int prev_height = 600;
 int prev_win_x = 0;
@@ -50,11 +39,6 @@ float drawText_lineH = 15;
 float drawText_alignH = 0;
 float drawText_alignV = 0;
 
-DisplayFlag displayFlag;
-std::string device_name;
-
-Simulation * simulation = NULL;
-
 int anim_iteration;
 int iter_last_time;
 double fps;
@@ -64,124 +48,70 @@ enum { FPS_ITERATIONS=100 };
 enum { FPS_SAMPLES=10 };
 double iter_time_buffer[FPS_SAMPLES];
 
-void reshape(int w, int h);
-void display();
-void idle();
-void mouse(int button, int state, int x, int y);
-void motion(int x, int y);
-void keyboard(unsigned char key, int x, int y);
-void special(int key, int x, int y);
-void close();
-void menu(int item);
+void _reshape(int w, int h);
+void _display();
+void _idle();
+void _mouse(int button, int state, int x, int y);
+void _motion(int x, int y);
+void _keyboard(unsigned char key, int x, int y);
+void _special(int key, int x, int y);
 void drawTextFont(float size, bool serif = false);
 void drawTextAlign(float h, float v);
 void drawTextPos(float x, float y);
 float drawText(const char* str);
 float drawTextF(const char* fmt, ...);
-void init_glut(int* argc, char** argv);
-void run_glut();
 
 void GuiGlut::init(int argc, char ** argv) {
-    parentProcessDir = getProcessFullPath(argv[0]);
-    parentProcessDir = getParentDir(parentProcessDir);
-    parentSceneDir = getParentDir(argv[1]);
+    glut_gui = this;
 
-    std::ostringstream o;
-    o << "CPU: " << cpu_name();
-    device_name = o.str();
-
-    if (! m_simulation.read_scene(argv[1])) return;
-    simulation = &m_simulation;
-
-    init_glut(&argc,argv);
-}
-
-int GuiGlut::run() {
-    run_glut();
-    return 0;
-}
-
-
-void init_glut(int* argc, char** argv)
-{
-    displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
-
-    glutInit(argc, argv);
-    glutInitWindowSize(window_width, window_height);
+    glutInit(&argc, argv);
+    glutInitWindowSize(m_window_width, m_window_height);
     glutInitDisplayString("rgba depth>=16 double samples");
 
     winid = glutCreateWindow(title_loading);
-    glutReshapeFunc ( reshape );
-    glutDisplayFunc ( display );
-	glutIdleFunc ( idle );
-    glutMouseFunc ( mouse );
-    glutMotionFunc ( motion );
-    glutKeyboardFunc ( keyboard );
-    glutSpecialFunc ( special );
+    glutReshapeFunc ( _reshape );
+    glutDisplayFunc ( _display );
+    glutIdleFunc ( _idle );
+    glutMouseFunc ( _mouse );
+    glutMotionFunc ( _motion );
+    glutKeyboardFunc ( _keyboard );
+    glutSpecialFunc ( _special );
     //glutWMCloseFunc ( close );
 
-    glewInit();
+    initSimulation(argc,argv);
 
-    glMatrixMode   ( GL_MODELVIEW );  // Select The Model View Matrix
-    glLoadIdentity ( );    // Reset The Model View Matrix
-
-    glClearColor ( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glutSwapBuffers ();
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glutSwapBuffers ();
-
-    glClearColor ( background_color[0], background_color[1], background_color[2], background_color[3] );
-
-    simulation->init();
-//    reshape(window_width, window_height);
-//    glutSetWindowTitle(pause_animation ? title_paused : title_active);
+    initGL();
 }
 
-
-void run_glut()
-{
+void GuiGlut::run() {
     glutMainLoop();
 }
 
-void reshape(int w, int h)
-{
-    TReal simulation_size = simulation->getSize();
-
-    window_width = w;
-    window_height = h;
-
-    glViewport(0, 0, w, h);
-    glMatrixMode   ( GL_PROJECTION );  // Select The Projection Matrix
-    glLoadIdentity ( );                // Reset The Projection Matrix
-    gluPerspective ( 40, (GLdouble)w / (GLdouble)h, 0.001*simulation_size, 100.0*simulation_size );
-    glMatrixMode   ( GL_MODELVIEW );  // Select The Model View Matrix
+void _reshape(int w, int h) {
+    glut_gui->reshape(w,h);
 }
 
-void display()
-{
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+void _display() {
+    glut_gui->display();
 
-    simulation->render(displayFlag);
-
-    if (displayFlag.isActive(DisplayFlag::STATS)) {
+    if (glut_gui->m_displayFlag.isActive(DisplayFlag::STATS)) {
         glDisable(GL_DEPTH_TEST);
 
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glLoadIdentity();
-        gluOrtho2D(0.5f, window_width+0.5f, 0.5f, window_height+0.5f);
+        gluOrtho2D(0.5f, glut_gui->m_window_width+0.5f, 0.5f, glut_gui->m_window_height+0.5f);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
         glEnable(GL_BLEND);
 
-        if (background_color[0] > 0.5f)
+        if (glut_gui->m_background_color[0] > 0.5f)
             glColor4f(0.0f,0.0f,0.0f,1.0f);
         else
             glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-        if (background_color[0] > 0.5f)
+        if (glut_gui->m_background_color[0] > 0.5f)
             glColor4f(0.0f,0.0f,0.0f,1.0f);
         else
             glColor4f(1.0f,1.0f,1.0f,1.0f);
@@ -189,14 +119,14 @@ void display()
         drawTextAlign(0,0);
 
         if (pause_animation) {
-            drawTextPos(window_width/2.0-120,window_height-20.0);
+            drawTextPos(glut_gui->m_window_width/2.0-120,glut_gui->m_window_height-20.0);
             drawTextF("PAUSE : press SPACE to start the animation");
         }
 
         drawTextPos(10,20);
         drawTextF("FPS: %.1f",fps);
-        drawTextF("%s",device_name.c_str());
-        drawTextF("Picking Stiffness: %.1f",simulation->getPickingStiffness());
+        drawTextF("%s",glut_gui->m_deviceName.c_str());
+        drawTextF("Picking Stiffness: %.1f",glut_gui->m_simulation.getPickingStiffness());
         drawTextF("");
 
         glDisable(GL_BLEND);
@@ -210,8 +140,7 @@ void display()
     glutSwapBuffers();
 }
 
-void idle()
-{
+void _idle() {
     if (!pause_animation) {
         double t = glutGet(GLUT_ELAPSED_TIME);
 
@@ -231,71 +160,36 @@ void idle()
             iter_last_time = t;
         }
 
-        simulation->step();
-
-        ++anim_iteration;
+        glut_gui->idle();
     }
 
     glutPostRedisplay();
 }
 
-void motion(int x, int y)
-{
-    int dx = x - mouse_x;
-    int dy = y - mouse_y;
-
-    mouse_x = x;
-    mouse_y = y;
-
-    if (camera_mode == 0) simulation->rotateCamera(dx,dy);
-    else if (camera_mode == 1) simulation->translateCamera(dx,dy);
-    else if (camera_mode == 2) simulation->zoomCamera(dx,dy);
-    else if (camera_mode == 3) simulation->updatePickingForce(x,y);
-    else if (camera_mode == 4) simulation->updatePickingConstraint(x,y);
+void _motion(int x, int y) {
+    glut_gui->motion(x,y);
 }
 
-void mouse(int button, int state, int x, int y)
-{
-    camera_mode = -1;
-    motion(x,y);
+void _mouse(int button, int state, int x, int y) {
+
     int modifiers = glutGetModifiers();
 
-    switch(button)
-    {
-        case GLUT_LEFT_BUTTON :
-            if (state == GLUT_DOWN) {
-                if (modifiers == GLUT_ACTIVE_SHIFT) {
-                    simulation->startForcePicking(x,y);
-                    camera_mode = 3;
-                } else {
-                    camera_mode = 0;
-                }
-            } else simulation->stopForcePicking();
+    Gui::MOUSE_BUTTON _button;
+    Gui::MOUSE_STATE _state;
+    bool _shift = (modifiers == GLUT_ACTIVE_SHIFT);
 
-            break;
-        case GLUT_RIGHT_BUTTON :
-            if (state == GLUT_DOWN) {
-                if (modifiers == GLUT_ACTIVE_SHIFT) {
-                    simulation->startConstraintPicking(x,y);
-                    camera_mode = 4;
-                } else {
-                    camera_mode = 1;
-                }
-            } else simulation->stopConstraintPicking();
+    if (button == GLUT_LEFT_BUTTON) _button = Gui::LEFT_BUTTON;
+    else if (button == GLUT_RIGHT_BUTTON) _button = Gui::RIGHT_BUTTON;
+    else if (button == GLUT_WHEEL_UP) _button = Gui::WHEEL_UP;
+    else _button = Gui::WHEEL_DOWN;
 
-            break;
-        case GLUT_WHEEL_UP:
-            simulation->zoomCamera(0,10);
-            break;
-        case GLUT_WHEEL_DOWN:
-            simulation->zoomCamera(0,-10);
-//            glutPostRedisplay();
-            break;
-    }
+    if (state == GLUT_DOWN) _state = Gui::STATE_DOWN;
+    else _state = Gui::STATE_UP;
+
+    glut_gui->mouse(_button,_state,_shift,x,y);
 }
 
-void keyboard(unsigned char key, int /*x*/, int /*y*/)
-{
+void _keyboard(unsigned char key, int /*x*/, int /*y*/) {
     switch (key)
     {
     case ' ': // SPACE
@@ -306,7 +200,7 @@ void keyboard(unsigned char key, int /*x*/, int /*y*/)
     }
     case 8: // DEL
     case '0':
-        simulation->reset_camera();
+        glut_gui->m_simulation.reset_camera();
 //        if (pause_animation) glutPostRedisplay();
         break;
     case 27: // ESC
@@ -331,53 +225,45 @@ void keyboard(unsigned char key, int /*x*/, int /*y*/)
         }
         break;
     case '+': // ENTER
-        simulation->addPickingStiffness(10);
+        glut_gui->m_simulation.addPickingStiffness(10);
         break;
     case '-': // ENTER
-        simulation->addPickingStiffness(-10);
+        glut_gui->m_simulation.addPickingStiffness(-10);
         break;
     case 's': // STEP
         pause_animation = true;
-        simulation->step();
+        glut_gui->m_simulation.step();
 //        glutPostRedisplay();
     }
 }
 
-void special(int key, int /*x*/, int /*y*/)
-{
+void _special(int key, int /*x*/, int /*y*/) {
     if (key >= GLUT_KEY_F1 && key < GLUT_KEY_F1 + DisplayFlag::Nflag)
     {
         DisplayFlag::DisplayMode mode = (DisplayFlag::DisplayMode) (key-GLUT_KEY_F1);
-        if (displayFlag.isActive(mode)) displayFlag.flag &= ~(1<<mode);
-        else displayFlag.flag |= (1<<mode);
+        glut_gui->m_displayFlag.switchMode(mode);
         return;
     }
 
     switch (key)
     {
     case GLUT_KEY_UP:
-        simulation->translateCamera(0,10);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.translateCamera(0,10);
         break;
     case GLUT_KEY_DOWN:
-        simulation->translateCamera(0,-10);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.translateCamera(0,-10);
         break;
     case GLUT_KEY_LEFT:
-        simulation->translateCamera(50,0);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.translateCamera(50,0);
         break;
     case GLUT_KEY_RIGHT:
-        simulation->translateCamera(-50,0);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.translateCamera(-50,0);
         break;
     case GLUT_KEY_PAGE_UP:
-        simulation->rotateCamera(0,25);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.rotateCamera(0,25);
         break;
     case GLUT_KEY_PAGE_DOWN:
-        simulation->rotateCamera(0,-25);
-//        glutPostRedisplay();
+        glut_gui->m_simulation.rotateCamera(0,-25);
         break;
     default:
         ;
@@ -440,7 +326,7 @@ float drawText(const char* str)
         //glRasterPos2i(x, window_height-y);
     }
 
-    glRasterPos2i(x, window_height-y);
+    glRasterPos2i(x, glut_gui->m_window_height-y);
     bool eol = true;
     while (*str)
     {
@@ -461,7 +347,7 @@ float drawText(const char* str)
         }
         else
         {
-            glRasterPos2i(x, window_height-y);
+            glRasterPos2i(x, glut_gui->m_window_height-y);
             glutBitmapCharacter(drawText_glutFont, c);
             x += glutBitmapWidth(drawText_glutFont, c);
         }

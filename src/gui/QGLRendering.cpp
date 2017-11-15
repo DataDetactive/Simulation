@@ -59,65 +59,27 @@
 #include <stdlib.h>
 #include <core/Node.h>
 
-QGLRendering::QGLRendering(MainWindow * mw) : QOpenGLWidget() {
-    main_mindow = mw;
+QGLRendering::QGLRendering(Gui * gui) : QOpenGLWidget() {
+    m_gui = gui;
 }
 
 void QGLRendering::initializeGL() {
     QOpenGLWidget::initializeGL();
 
-    main_mindow->m_displayFlag.flag = 1<<DisplayFlag::STATS | 1<<DisplayFlag::VISUAL;
-
-//    glutInit(argc, argv);
-//    glutInitWindowSize(window_width, window_height);
-//    glutInitDisplayString("rgba depth>=16 double samples");
-
-//    winid = glutCreateWindow(title_loading);
-//    glutReshapeFunc ( reshape );
-//    glutDisplayFunc ( display );
-//	glutIdleFunc ( idle );
-//    glutMouseFunc ( mouse );
-//    glutMotionFunc ( motion );
-//    glutKeyboardFunc ( keyboard );
-//    glutSpecialFunc ( special );
-//    //glutWMCloseFunc ( close );
-
-    glewInit();
-
-    glMatrixMode   ( GL_MODELVIEW );  // Select The Model View Matrix
-    glLoadIdentity ( );    // Reset The Model View Matrix
-
-    glClearColor ( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-//    glutSwapBuffers ();
-//    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-//    glutSwapBuffers ();
-
-//    glClearColor ( background_color[0], background_color[1], background_color[2], background_color[3] );
-
-    main_mindow->m_simulation.init();
-//    reshape(window_width, window_height);
-//    glutSetWindowTitle(pause_animation ? title_paused : title_active);
+    m_gui->initGL();
 }
 
 void QGLRendering::paintGL() {
-    main_mindow->m_simulation.step();
+    m_gui->idle();
 
-    main_mindow->m_simulation.render(main_mindow->m_displayFlag);
-
+    m_gui->display();
 
     this->update();
 }
 
-
 void QGLRendering::resizeGL(int w, int h) {
-    QOpenGLWidget::resizeGL(w,h);
-
-    TReal simulation_size = 10;//(main_mindow->simulation.main_Node->getBBox().max - main_mindow->simulation.main_Node->getBBox().min).norm();
-
-    glViewport(0, 0, w, h);
-    glMatrixMode   ( GL_PROJECTION );  // Select The Projection Matrix
-    glLoadIdentity ( );                // Reset The Projection Matrix
-    gluPerspective ( 40, (GLdouble)w / (GLdouble)h, 0.001*simulation_size, 100.0*simulation_size );
-    glMatrixMode   ( GL_MODELVIEW );  // Select The Model View Matrix
+    m_gui->reshape(w,h);
 }
+
+
+

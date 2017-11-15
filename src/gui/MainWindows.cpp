@@ -57,12 +57,6 @@
 ////! [0]
 void MainWindow::init(int argc, char **argv)
 {
-    parentProcessDir = getProcessFullPath(argv[0]);
-    parentProcessDir = getParentDir(parentProcessDir);
-    parentSceneDir = getParentDir(argv[1]);
-
-    if (! m_simulation.read_scene(argv[1])) return;
-
     rendering = new QGLRendering(this);
 
 //    QHBoxLayout *layout = new QHBoxLayout;
@@ -74,17 +68,17 @@ void MainWindow::init(int argc, char **argv)
 //    widget->setLayout(layout);
 
     setCentralWidget(rendering);
-    setWindowTitle(cpu_name().c_str());
+//    setWindowTitle(cpu_name().c_str());
     setUnifiedTitleAndToolBarOnMac(true);
 
-
+    this->initSimulation(argc,argv);
 //    this->setGeometry(100, 100, 800, 500);
 
 
 //    std::cout << PLUGIN_DATA_DIR_ << std::endl;
 }
 
-int MainWindow::run() {
-    return 1;
+void MainWindow::run() {
+    show();
 }
 

@@ -65,7 +65,7 @@ public:
 
    void init(int argc, char **argv);
 
-   int run();
+   void run();
 
    QGLRendering *rendering;
 //   DiagramScene *scene;
@@ -73,8 +73,6 @@ public:
 
 //   QMenu *itemMenu;
 
-   Simulation m_simulation;
-   DisplayFlag m_displayFlag;
 
 };
 

@@ -56,6 +56,7 @@ set(SOURCE_FILES
     src/core/Factory.cpp
     src/core/Node.cpp
     src/core/Data.cpp
+    src/gui/Gui.cpp
     src/gui/glut_methods.cpp
     src/gui/MainWindows.cpp
     src/gui/QGLRendering.cpp
