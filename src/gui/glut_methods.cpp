@@ -161,6 +161,7 @@ void _idle() {
         }
 
         glut_gui->idle();
+        anim_iteration++;
     }
 
     glutPostRedisplay();

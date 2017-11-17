@@ -74,12 +74,55 @@ void QGLRendering::paintGL() {
 
     m_gui->display();
 
+//    frameSwapped();
     this->update();
 }
 
 void QGLRendering::resizeGL(int w, int h) {
     m_gui->reshape(w,h);
+    this->update();
 }
 
+void QGLRendering::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) m_gui->mouse(Gui::LEFT_BUTTON,Gui::STATE_DOWN,event->modifiers() & Qt::ShiftModifier,event->x(),event->y());
+    else if (event->button() == Qt::RightButton) m_gui->mouse(Gui::RIGHT_BUTTON,Gui::STATE_DOWN,event->modifiers() & Qt::ShiftModifier,event->x(),event->y());
+    this->update();
+}
+
+void QGLRendering::mouseReleaseEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) m_gui->mouse(Gui::LEFT_BUTTON,Gui::STATE_UP,event->modifiers() & Qt::ShiftModifier,event->x(),event->y());
+    else if (event->button() == Qt::RightButton) m_gui->mouse(Gui::RIGHT_BUTTON,Gui::STATE_UP,event->modifiers() & Qt::ShiftModifier,event->x(),event->y());
+    this->update();
+}
+
+void QGLRendering::wheelEvent ( QWheelEvent * event ) {
+  if(event->delta() > 0) {
+      Gui::MOUSE_BUTTON _button = Gui::WHEEL_UP;
+      Gui::MOUSE_STATE _state = Gui::STATE_UP;
+      bool _shift = event->modifiers() & Qt::ShiftModifier;
+
+      m_gui->mouse(_button,_state,_shift,event->x(),event->y());
+  } else if(event->delta() < 0) {
+      Gui::MOUSE_BUTTON _button = Gui::WHEEL_DOWN;
+      Gui::MOUSE_STATE _state = Gui::STATE_DOWN;
+      bool _shift = event->modifiers() & Qt::ShiftModifier;
+      m_gui->mouse(_button,_state,_shift,event->x(),event->y());
+  }
+  this->update();
+}
+
+
+void QGLRendering::QGLRendering::mouseMoveEvent(QMouseEvent *event) {
+    m_gui->motion(event->x(),event->y());
+    this->update();
+}
+
+void QGLRendering::keyPressEvent(QKeyEvent *e) {
+
+}
+
+void QGLRendering::keyReleaseEvent(QKeyEvent *e) {
+
+}
 
 

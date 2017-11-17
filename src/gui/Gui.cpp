@@ -145,7 +145,7 @@ void Gui::initGL() {
 
     m_simulation.init();
 
-    reshape(m_window_width, m_window_height);
+//    reshape(m_window_width, m_window_height);
 }
 
 void Gui::reshape(int w, int h) {

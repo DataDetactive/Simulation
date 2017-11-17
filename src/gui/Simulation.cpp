@@ -346,7 +346,12 @@ void Simulation::update_picking_org(int x, int y) {
     gluUnProject(x, viewport[3]-y, 0, viewmatrix, projmatrix, viewport, &obj_x, &obj_y, &obj_z);
 
     picked_origin = camera_position;
+
+    std::cout << " x " << x << " " << y << " " << viewport[2] << " " << viewport[3] << std::endl;
+    std::cout << picked_origin << std::endl;
     picked_dir = TVec3(obj_x, obj_y, obj_z) - picked_origin;
+
+    std::cout << picked_dir << std::endl;
     picked_dir.normalize();
 }
 

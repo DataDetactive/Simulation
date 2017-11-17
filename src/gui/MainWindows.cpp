@@ -68,6 +68,7 @@ void MainWindow::init(int argc, char **argv)
 //    widget->setLayout(layout);
 
     setCentralWidget(rendering);
+
 //    setWindowTitle(cpu_name().c_str());
     setUnifiedTitleAndToolBarOnMac(true);
 
@@ -76,6 +77,9 @@ void MainWindow::init(int argc, char **argv)
 
 
 //    std::cout << PLUGIN_DATA_DIR_ << std::endl;
+
+    this->resize(800,600);
+    rendering->resize(800,600);
 }
 
 void MainWindow::run() {
