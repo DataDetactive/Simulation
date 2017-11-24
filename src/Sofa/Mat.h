@@ -39,7 +39,7 @@ namespace defaulttype
 
 using std::cerr;
 using std::endl;
-template <int L, int C, class real=float>
+template <int L, int C, class real=double>
 class Mat : public helper::fixed_array<VecNoInit<C,real>,L>
 {
  public:

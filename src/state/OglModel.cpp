@@ -53,7 +53,7 @@ void OglModel::updateNormals() {
         TVec3 C = X[triangles[i][2]];
         B -= A;
         C -= A;
-        TVec3 n = cross(B,C);
+        TVec3 n = B.cross(C);
         n.normalize();
         TReal Au = textures[triangles[i][0]][0];
         TReal Bu = textures[triangles[i][1]][0];
@@ -70,7 +70,7 @@ void OglModel::updateNormals() {
     }
     for (unsigned int i=0;i<m_normals.size();++i)
     {
-        m_tangents[i] = cross(m_normals[i],m_tangents[i]);
+        m_tangents[i] = m_normals[i].cross(m_tangents[i]);
         m_normals[i].normalize();
         m_tangents[i].normalize();
     }

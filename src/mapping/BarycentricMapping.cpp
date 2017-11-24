@@ -48,10 +48,10 @@ int BarycentricMapping::computeBaryCoords(TVec3 out,const std::vector<TTetra> & 
         TVec3 e = out - in[tetras[i][0]];
 
         // volume of the tetra Vd=(a,b,c,d) and 3 tetras Va=(e,b,c,d) Vb=(a,e,c,d) Vc=(a,b,e,d)
-        double Vd = 1.0/6.0 * dot(a,cross(b,c));
-        double Va = 1.0/6.0 * dot(e,cross(b,c));
-        double Vb = 1.0/6.0 * dot(a,cross(e,c));
-        double Vc = 1.0/6.0 * dot(a,cross(b,e));
+        double Vd = 1.0/6.0 * a.dot(b.cross(c));
+        double Va = 1.0/6.0 * e.dot(b.cross(c));
+        double Vb = 1.0/6.0 * a.dot(e.cross(c));
+        double Vc = 1.0/6.0 * a.dot(b.cross(e));
 
         double ca = Va/Vd;
         double cb = Vb/Vd;
@@ -105,10 +105,10 @@ void BarycentricMapping::draw(DisplayFlag flag) {
     {
         TTetra tetra = tetras[m_map_i[i]];
 
-        glVertex3fv(out[i].ptr());glVertex3fv(in[tetra[0]].ptr());
-        glVertex3fv(out[i].ptr());glVertex3fv(in[tetra[1]].ptr());
-        glVertex3fv(out[i].ptr());glVertex3fv(in[tetra[2]].ptr());
-        glVertex3fv(out[i].ptr());glVertex3fv(in[tetra[3]].ptr());
+        glVertex3dv(out[i].data());glVertex3dv(in[tetra[0]].data());
+        glVertex3dv(out[i].data());glVertex3dv(in[tetra[1]].data());
+        glVertex3dv(out[i].data());glVertex3dv(in[tetra[2]].data());
+        glVertex3dv(out[i].data());glVertex3dv(in[tetra[3]].data());
     }
     glEnd();
 }

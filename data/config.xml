@@ -17,7 +17,7 @@
                 <BoxConstraint name="b2" box="-1 -1 -1  10 10 10" />
 		
                 <Node name="VM" >
-                        <MeshVTKLoader name="loader" filename="liver-smooth.vtk" />
+                        <MeshObjLoader name="loader" filename="liver-surface.obj" />
                         <TriangleSetTopologyContainer name="triTopo" src="@loader" />
 
                         <OglShader vertFilename="shaders/bumpVertexShader.glsl" fragFilename="shaders/bumpFragmentShader.glsl"/>

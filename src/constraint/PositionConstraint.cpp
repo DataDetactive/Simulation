@@ -35,7 +35,7 @@ void PositionConstraint::draw(DisplayFlag /*flag*/) {
     glColor3f(1.0f,0.4f,0.4f);
     glPointSize(10);
     glBegin(GL_POINTS);
-        glVertex3fv(p1.ptr());
+        glVertex3dv(p1.data());
     glEnd();
     glPointSize(1);
 }

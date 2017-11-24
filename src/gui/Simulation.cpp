@@ -23,9 +23,9 @@ void Simulation::addPickingStiffness(double a) {
 }
 
 bool Simulation::read_scene(const char * fn) {
-    std::string filename = getFullPath(fn);
+    m_filename = getFullPath(fn);
 
-    xmlTextReaderPtr reader = xmlReaderForFile(filename.c_str(), NULL, 0);
+    xmlTextReaderPtr reader = xmlReaderForFile(m_filename.c_str(), NULL, 0);
 
     if (reader != NULL) {
         xmlTextReaderRead(reader);
@@ -45,11 +45,15 @@ bool Simulation::read_scene(const char * fn) {
 
         xmlFreeTextReader(reader);
     } else {
-        std::cerr << "Unable to open " << filename << std::endl;
+        std::cerr << "Unable to open " << m_filename << std::endl;
         return false;
     }
 
     return true;
+}
+
+std::string Simulation::getFileName() {
+    return m_filename;
 }
 
 bool Simulation::processNode(Node * node,xmlTextReaderPtr reader) {
@@ -123,7 +127,6 @@ bool Simulation::processNode(Node * node,xmlTextReaderPtr reader) {
     return true;
 }
 
-
 void Simulation::init()
 {
     main_Node->init();
@@ -133,8 +136,8 @@ void Simulation::init()
     TReal simulation_size = (m_bbox.max-m_bbox.min).norm();
     TVec3 simulation_center = (m_bbox.min + m_bbox.max) * 0.5f;
 
-    light0_position = simulation_center + TVec3(0.0f,2.0f,0.0f)*simulation_size; light0_position[3] = 1;
-    light1_position = simulation_center + TVec3(3.0f,-0.5f,-1.0f)*simulation_size; light1_position[3] = 1;
+    light0_position = simulation_center + TVec3(0.0f,2.0f,0.0f)*simulation_size;
+    light1_position = simulation_center + TVec3(3.0f,-0.5f,-1.0f)*simulation_size;
     reset_camera();
 
 //    pGLUquadric = gluNewQuadric();
@@ -150,24 +153,31 @@ void Simulation::init()
     GLfloat    vzero[4] = {0, 0, 0, 0};
     GLfloat    vone[4] = {1, 1, 1, 1};
 
+    GLfloat    light_ambient_ptr[4] = {(GLfloat) light_ambient[0],(GLfloat)  light_ambient[1],(GLfloat)  light_ambient[2],(GLfloat) light_ambient[3]};
+    GLfloat    light0_color_ptr[4] = {(GLfloat) light0_color[0],(GLfloat)  light0_color[1],(GLfloat)  light0_color[2],(GLfloat) light0_color[3]};
+    GLfloat    light0_position_ptr[4] = {(GLfloat) light0_position[0],(GLfloat)  light0_position[1],(GLfloat)  light0_position[2],(GLfloat) 1.0};
+
+    GLfloat    light1_color_ptr[4] = {(GLfloat) light1_color[0],(GLfloat)  light1_color[1],(GLfloat)  light1_color[2],(GLfloat) light1_color[3]};
+    GLfloat    light1_position_ptr[4] = {(GLfloat) light1_position[0],(GLfloat)  light1_position[1],(GLfloat)  light1_position[2],(GLfloat) 1.0};
+
     // Set light model
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient.ptr());
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient_ptr);
 
     // Setup 'light 0'
     glEnable(GL_LIGHT0);
     glLightfv(GL_LIGHT0, GL_AMBIENT, vzero);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_color.ptr());
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light0_color.ptr());
-    glLightfv(GL_LIGHT0, GL_POSITION, light0_position.ptr());
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_color_ptr);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light0_color_ptr);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_position_ptr);
 
     // Setup 'light 1'
     glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT1, GL_AMBIENT, vzero);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_color.ptr());
-    glLightfv(GL_LIGHT1, GL_SPECULAR, light1_color.ptr());
-    glLightfv(GL_LIGHT1, GL_POSITION, light1_position.ptr());
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_color_ptr);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light1_color_ptr);
+    glLightfv(GL_LIGHT1, GL_POSITION, light1_position_ptr);
 
     // Enable color tracking
     glMaterialfv(GL_FRONT, GL_AMBIENT, vone);
@@ -197,8 +207,6 @@ void Simulation::step() {
 
     m_time += main_Node->getDt();
     anim->step(m_time);
-
-
 }
 
 double Simulation::getSize() {
@@ -216,8 +224,12 @@ void Simulation::render(DisplayFlag displayFlag)
               camera_lookat[0], camera_lookat[1], camera_lookat[2],
               0, 1, 0);
 
-    glLightfv(GL_LIGHT0, GL_POSITION, light0_position.ptr());
-    glLightfv(GL_LIGHT1, GL_POSITION, light1_position.ptr());
+    GLfloat    light0_position_ptr[4] = {(GLfloat) light0_position[0],(GLfloat)  light0_position[1],(GLfloat)  light0_position[2],(GLfloat) 1.0};
+    GLfloat    light1_position_ptr[4] = {(GLfloat) light1_position[0],(GLfloat)  light1_position[1],(GLfloat)  light1_position[2],(GLfloat) 1.0};
+
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_position_ptr);
+    glLightfv(GL_LIGHT1, GL_POSITION, light1_position_ptr);
 
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -238,8 +250,8 @@ void Simulation::reset_camera()
 }
 
 void Simulation::rotateCamera(int dx,int dy) {
-    TVec3 vx = cross(camera_direction, TVec3(0,1,0));
-    TVec3 vy = cross(vx,camera_direction);
+    TVec3 vx = camera_direction.cross(TVec3(0,1,0));
+    TVec3 vy = vx.cross(camera_direction);
     vx.normalize();
     vy.normalize();
     camera_direction += (vx*dx + vy*dy)*0.005;
@@ -247,8 +259,8 @@ void Simulation::rotateCamera(int dx,int dy) {
 }
 
 void Simulation::translateCamera(int dx,int dy) {
-    TVec3 vx = cross(camera_direction, TVec3(0,1,0));
-    TVec3 vy = cross(vx,camera_direction);
+    TVec3 vx = camera_direction.cross(TVec3(0,1,0));
+    TVec3 vy = vx.cross(camera_direction);
     vx.normalize();
     vy.normalize();
 
@@ -256,8 +268,8 @@ void Simulation::translateCamera(int dx,int dy) {
 }
 
 void Simulation::zoomCamera(int dx,int dy) {
-    TVec3 vx = cross(camera_direction, TVec3(0,1,0));
-    TVec3 vy = cross(vx,camera_direction);
+    TVec3 vx = camera_direction.cross(TVec3(0,1,0));
+    TVec3 vy = vx.cross(camera_direction);
     vx.normalize();
     vy.normalize();
 
@@ -271,7 +283,7 @@ void Simulation::updatePickingForce() {
     if (pickingForceField.d_index.getValue() == -1) return;
 
     TVec3 particle = pos[pickingForceField.d_index.getValue()];
-    pickingForceField.d_force.setValue(picked_origin + picked_dir * dot(particle-picked_origin, picked_dir) - particle);
+    pickingForceField.d_force.setValue(picked_origin + picked_dir * (particle-picked_origin).dot(picked_dir) - particle);
 }
 
 void Simulation::updatePickingForce(int x,int y) {
@@ -286,7 +298,7 @@ void Simulation::updatePickingConstraint(int x,int y) {
 
     const std::vector<TVec3> & pos = pickingConstraint.getContext()->getMstate()->get(VecID::position);
     TVec3 particle = pos[pickingConstraint.d_index.getValue()];
-    pickingConstraint.d_position.setValue(picked_origin + picked_dir * dot(particle-picked_origin, picked_dir));
+    pickingConstraint.d_position.setValue(picked_origin + picked_dir * (particle-picked_origin).dot(picked_dir));
 }
 
 void Simulation::startForcePicking(int x,int y) {
@@ -347,11 +359,11 @@ void Simulation::update_picking_org(int x, int y) {
 
     picked_origin = camera_position;
 
-    std::cout << " x " << x << " " << y << " " << viewport[2] << " " << viewport[3] << std::endl;
-    std::cout << picked_origin << std::endl;
+//    std::cout << " x " << x << " " << y << " " << viewport[2] << " " << viewport[3] << std::endl;
+//    std::cout << picked_origin << std::endl;
     picked_dir = TVec3(obj_x, obj_y, obj_z) - picked_origin;
 
-    std::cout << picked_dir << std::endl;
+//    std::cout << picked_dir << std::endl;
     picked_dir.normalize();
 }
 

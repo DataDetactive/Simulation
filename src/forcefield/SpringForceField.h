@@ -16,7 +16,7 @@ public:
 
     void addForce(TVecId f);
 
-    void draw(DisplayFlag flag);
+    void draw(DisplayFlag);
 
 };
 

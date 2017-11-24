@@ -52,9 +52,7 @@ public :
 
     std::string getFullPath(const char * fn);
 
-
     std::string m_parentProcessDir;
-    std::string m_parentSceneDir;
     std::string m_deviceName;
     Simulation m_simulation;
     DisplayFlag m_displayFlag;

@@ -52,23 +52,23 @@ void Topology::draw(DisplayFlag flag) {
             d = (d+center)*(TReal)0.666667;
 
             glColor4f(0+color,0,1-color,1);
-            glVertex3fv(a.ptr()); glVertex3fv(c.ptr()); glVertex3fv(b.ptr());
+            glVertex3dv(a.data()); glVertex3dv(c.data()); glVertex3dv(b.data());
 
             glColor4f(0+color,0.5f-0.5f*color,1-color,1);
-            glVertex3fv(b.ptr()); glVertex3fv(c.ptr()); glVertex3fv(d.ptr());
+            glVertex3dv(b.data()); glVertex3dv(c.data()); glVertex3dv(d.data());
 
             glColor4f(0+color,1-color,1-color,1);
-            glVertex3fv(c.ptr()); glVertex3fv(a.ptr()); glVertex3fv(d.ptr());
+            glVertex3dv(c.data()); glVertex3dv(a.data()); glVertex3dv(d.data());
 
             glColor4f(0.5f+0.5f*color,1-color,1-0.5f*color,1);
-            glVertex3fv(d.ptr()); glVertex3fv(a.ptr()); glVertex3fv(b.ptr());
+            glVertex3dv(d.data()); glVertex3dv(a.data()); glVertex3dv(b.data());
 
 
             glColor4f(1,0,0,1);
-            glVertex3fv(a.ptr()); glVertex3fv(b.ptr()); glVertex3fv(c.ptr());
-            glVertex3fv(b.ptr()); glVertex3fv(d.ptr()); glVertex3fv(c.ptr());
-            glVertex3fv(c.ptr()); glVertex3fv(d.ptr()); glVertex3fv(a.ptr());
-            glVertex3fv(d.ptr()); glVertex3fv(b.ptr()); glVertex3fv(a.ptr());
+            glVertex3dv(a.data()); glVertex3dv(b.data()); glVertex3dv(c.data());
+            glVertex3dv(b.data()); glVertex3dv(d.data()); glVertex3dv(c.data());
+            glVertex3dv(c.data()); glVertex3dv(d.data()); glVertex3dv(a.data());
+            glVertex3dv(d.data()); glVertex3dv(b.data()); glVertex3dv(a.data());
         }
 
         glEnd(); // GL_TRIANGLES
@@ -81,7 +81,7 @@ void Topology::draw(DisplayFlag flag) {
         const std::vector<TVec3> & X = this->getContext()->getMstate()->get(VecID::position);
 
         for (unsigned i=0;i<X.size();i++) {
-            glVertex3fv(X[i].ptr());
+            glVertex3dv(X[i].data());
         }
 
         glEnd();

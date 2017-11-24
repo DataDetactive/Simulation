@@ -6,7 +6,7 @@
 class UniformMass : public ForceField {
 public:
 
-    Data<float> d_mass;
+    Data<double> d_mass;
 
     UniformMass();
 

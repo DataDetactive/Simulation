@@ -20,7 +20,7 @@ void SpringForceField::addForce(TVecId f) {
     this->getContext()->getMstate()->get(f)[d_index.getValue()] += d_force.getValue() * d_stiffness.getValue();
 }
 
-void SpringForceField::draw(DisplayFlag flag) {
+void SpringForceField::draw(DisplayFlag /*flag*/) {
     if (d_index.getValue() == -1) return;
 
     std::vector<TVec3> & pos = this->getContext()->getMstate()->get(VecID::position);
@@ -30,8 +30,8 @@ void SpringForceField::draw(DisplayFlag flag) {
 
     glLineWidth(3);
     glBegin(GL_LINES);
-    glColor3f(0.8f,0.2f,0.2f); glVertex3fv(p1.ptr());
-    glColor3f(1.0f,0.6f,0.6f); glVertex3fv(p2.ptr());
+    glColor3f(0.8f,0.2f,0.2f); glVertex3dv(p1.data());
+    glColor3f(1.0f,0.6f,0.6f); glVertex3dv(p2.data());
     glEnd(); // GL_LINES
     glLineWidth(1);
 }

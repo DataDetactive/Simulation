@@ -40,7 +40,7 @@ namespace defaulttype
 
 enum NoInit { NOINIT }; ///< use when calling Vec or Mat constructor to skip initialization of values to 0
 
-template <int N, typename real=float>
+template <int N, typename real=double>
 class Vec : public helper::fixed_array<real,N>
 {
 public:
@@ -121,7 +121,7 @@ public:
                 this->elems[6]=r7;
                 this->elems[7]=r8;
         }
-		
+
         /// Specific constructor for 9-elements vectors.
         Vec(real r1, real r2, real r3, real r4, real r5, real r6, real r7, real r8, real r9)
         {
@@ -166,7 +166,7 @@ public:
             this->elems[9]=r10;
             this->elems[10]=r11;
         }
-		
+
         /// Specific constructor for 11-elements vectors.
         Vec(real r1, real r2, real r3, real r4, real r5, real r6, real r7, real r8, real r9, real r10, real r11, real r12)
         {
@@ -269,6 +269,22 @@ public:
                         this->elems[i] = (real)v(i);
         }
 
+
+//        ///// Cross product for 3-elements vectors.
+//        template<typename real>
+//        Vec<3,real> cross(const Vec<3,real>& b)
+//        {
+//                return Vec<3,real>(a.y()*b.z() - a.z()*b.y(),
+//                                   a.z()*b.x() - a.x()*b.z(),
+//                                   a.x()*b.y() - a.y()*b.x());
+//        }
+
+        /// Dot product (alias for operator*)
+        real dot(const Vec<N,real>& b)
+        {
+                return *this*b;
+        }
+
     /// Sets every element to 0.
     void clear()
     {
@@ -323,13 +339,13 @@ public:
         //}
 
         /// Cast into a const array of values.
-        const real* ptr() const
+        const real* data() const
         {
                 return this->elems;
         }
 
         /// Cast into an array of values.
-        real* ptr()
+        real* data()
         {
                 return this->elems;
         }
@@ -499,14 +515,14 @@ public:
     bool operator==(const Vec& b) const
     {
         for (int i=0;i<N;i++)
-            if ( fabs( (float)(this->elems[i] - b[i]) ) > EQUALITY_THRESHOLD ) return false;
+            if ( fabs( (double)(this->elems[i] - b[i]) ) > EQUALITY_THRESHOLD ) return false;
         return true;
     }
 
     bool operator!=(const Vec& b) const
     {
         for (int i=0;i<N;i++)
-            if ( fabs( (float)(this->elems[i] - b[i]) ) > EQUALITY_THRESHOLD ) return true;
+            if ( fabs( (double)(this->elems[i] - b[i]) ) > EQUALITY_THRESHOLD ) return true;
         return false;
     }
 
@@ -514,7 +530,7 @@ public:
 };
 
 /// Same as Vec except the values are not initialized by default
-template <int N, typename real=float>
+template <int N, typename real=double>
 class VecNoInit : public Vec<N,real>
 {
 public:
@@ -563,28 +579,28 @@ std::ostream& operator << ( std::ostream& out, const Vec<N,Real>& v )
         return out;
 }
 
-/// Cross product for 3-elements vectors.
-template<typename real>
-inline Vec<3,real> cross(const Vec<3,real>& a, const Vec<3,real>& b)
-{
-        return Vec<3,real>(a.y()*b.z() - a.z()*b.y(),
-                           a.z()*b.x() - a.x()*b.z(),
-                           a.x()*b.y() - a.y()*b.x());
-}
+///// Cross product for 3-elements vectors.
+//template<typename real>
+//inline Vec<3,real> cross(const Vec<3,real>& a, const Vec<3,real>& b)
+//{
+//        return Vec<3,real>(a.y()*b.z() - a.z()*b.y(),
+//                           a.z()*b.x() - a.x()*b.z(),
+//                           a.x()*b.y() - a.y()*b.x());
+//}
 
-/// Cross product for 2-elements vectors.
-template <typename real>
-real cross(const defaulttype::Vec<2,real>& a, const defaulttype::Vec<2,real>& b )
-{
-    return a[0]*b[1] - a[1]*b[0];
-}
+///// Cross product for 2-elements vectors.
+//template <typename real>
+//real cross(const defaulttype::Vec<2,real>& a, const defaulttype::Vec<2,real>& b )
+//{
+//    return a[0]*b[1] - a[1]*b[0];
+//}
 
-/// Dot product (alias for operator*)
-template<int N,typename real>
-inline real dot(const Vec<N,real>& a, const Vec<N,real>& b)
-{
-        return a*b;
-}
+///// Dot product (alias for operator*)
+//template<int N,typename real>
+//inline real dot(const Vec<N,real>& a, const Vec<N,real>& b)
+//{
+//        return a*b;
+//}
 
 } // namespace defaulttype
 

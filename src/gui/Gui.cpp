@@ -57,6 +57,8 @@ std::string Gui::getFullPath(const char * fn) {
     }
 
     {
+        std::string m_parentSceneDir = getParentDir(m_simulation.getFileName());
+
         std::string filename = m_parentSceneDir + fn;
         std::ifstream f(filename.c_str());
         if (f.good()) return filename;
@@ -130,7 +132,7 @@ Gui::Gui() {
 void Gui::initSimulation(int argc,char ** argv) {
     m_parentProcessDir = getProcessFullPath(argv[0]);
     m_parentProcessDir = getParentDir(m_parentProcessDir);
-    m_parentSceneDir = getParentDir(argv[1]);
+
 
     if (! m_simulation.read_scene(argv[1])) return;
 }

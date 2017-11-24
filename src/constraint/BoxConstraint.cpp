@@ -2,7 +2,6 @@
 #include <constraint/BoxConstraint.h>
 #include <topology/Topology.h>
 #include <state/State.h>
-#include <GL/gl.h>
 #include <iostream>
 #include <stdarg.h>
 #include <stdio.h>

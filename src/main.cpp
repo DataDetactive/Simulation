@@ -1,6 +1,5 @@
 #include <gui/glut_methods.h>
-#include <gui/MainWindows.h>
-#include <QApplication>
+//#include <QApplication>
 
 Gui * gui;
 
@@ -15,16 +14,16 @@ int main(int argc, char **argv)
         return 1;
     }
 
-//    gui = new GuiGlut();
-//    gui->init(argc,argv);
-//    gui->run();
-
-
-    QApplication app(argc, argv);
-    gui = new MainWindow();
+    gui = new GuiGlut();
     gui->init(argc,argv);
     gui->run();
-    return app.exec();
+
+
+//    QApplication app(argc, argv);
+//    gui = new MainWindow();
+//    gui->init(argc,argv);
+//    gui->run();
+//    return app.exec();
 
     return 0;
 }

@@ -153,6 +153,8 @@ bool MeshObjLoader::read_obj(Topology * topo,State * state, std::ifstream & in) 
     }
 //    std::cout << nbp << " points" << std::endl;
 //    std::cout << nbt << " triangles" << std::endl;
+//    std::cout << texcoords->size() << " texcoords" << std::endl;
+
 
     if (texcoords && !tmppoints.empty())
     {

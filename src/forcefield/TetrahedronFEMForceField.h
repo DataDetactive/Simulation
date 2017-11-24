@@ -8,8 +8,8 @@
 class TetrahedronFEMForceField : public ForceField {
 public:
 
-    Data<float> d_youngModulus;
-    Data<float> d_poissonRatio;
+    Data<double> d_youngModulus;
+    Data<double> d_poissonRatio;
     Data<std::string> d_method;
 
     TetrahedronFEMForceField();

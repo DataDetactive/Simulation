@@ -35,7 +35,7 @@ public:
             TVec3 p = pos[i];
             p -= m_picked_origin;
             TReal pdist = p.norm();
-            TReal pdot = dot(p,m_picked_dir);
+            TReal pdot = p.dot(m_picked_dir);
             // we add to the distance to the particle 10 times the distance to the ray to prefer the closest particle of the same surface
             TReal dist = pdist + 10 * (m_picked_dir * pdot - p).norm();
             if (pdot / pdist > dotmargin && dist < m_mindist) {
@@ -126,14 +126,16 @@ public:
 
     void addPickingStiffness(double s);
 
+    std::string getFileName();
+
 private:
     TVec3 camera_lookat;
     double camera_distance;
     TVec3 camera_direction;
 
     TVec3 camera_position;
-    TVec4 light0_position;
-    TVec4 light1_position;
+    TVec3 light0_position;
+    TVec3 light1_position;
 
     TColor light_ambient;
     TColor light0_color;
@@ -146,6 +148,8 @@ private:
 
     double m_time;
     BoundingBox m_bbox;
+
+    std::string m_filename;
 
     SpringForceField pickingForceField;
     PositionConstraint pickingConstraint;

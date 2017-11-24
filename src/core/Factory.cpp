@@ -7,18 +7,20 @@
 #include <iostream>
 #include <core/BaseObject.h>
 
-static std::map<std::string,Creator > factory_map;
+static std::map<std::string,Creator > * factory_map = NULL;
 
 bool Factory::addFactory(const char * name,Creator c) {
-    factory_map[std::string(name)] = c;
+    if (factory_map == NULL) factory_map = new std::map<std::string,Creator >();
+
+    (*factory_map)[std::string(name)] = c;
 
     return true;
 }
 
 BaseObject * Factory::getInstance(const std::string & classname) {
-    std::map<std::string,Creator>::iterator it = factory_map.find(classname);
+    std::map<std::string,Creator>::iterator it = factory_map->find(classname);
 
-    if (it == factory_map.end()) return NULL;
+    if (it == factory_map->end()) return NULL;
 
     Creator c = it->second;
     BaseObject * obj = c();
