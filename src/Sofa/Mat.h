@@ -293,7 +293,7 @@ class Mat : public helper::fixed_array<VecNoInit<C,real>,L>
   }
 
   /// Return the transpose of m.
-  Mat<C,L,real> transposed() const
+  Mat<C,L,real> transpose() const
   {
     Mat<C,L,real> m(NOINIT);
     for (int i=0;i<L;i++)
@@ -302,16 +302,22 @@ class Mat : public helper::fixed_array<VecNoInit<C,real>,L>
     return m;
   }
 
-  /// Transpose current matrix.
-  void transpose()
-  {
-    for (int i=0;i<L;i++)
-      for (int j=i+1;j<C;j++)
-      {
-	real t = this->elems[i][j];
-	this->elems[i][j] = this->elems[j][i];
-	this->elems[j][i] = t;
-      }
+//  /// Transpose current matrix.
+//  void transposed()
+//  {
+//    for (int i=0;i<L;i++)
+//      for (int j=i+1;j<C;j++)
+//      {
+//	real t = this->elems[i][j];
+//	this->elems[i][j] = this->elems[j][i];
+//	this->elems[j][i] = t;
+//      }
+//  }
+
+  Mat<L,C,real> inverse() {
+      Mat<L,C,real> res;
+      invertMatrix(res,*this);
+      return res;
   }
 
     /// @name Tests operators
