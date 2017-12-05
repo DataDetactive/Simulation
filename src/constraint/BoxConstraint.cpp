@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <core/Visitor.h>
 #include <core/Context.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
 
 BoxConstraint::BoxConstraint()
 : d_box("box",BoundingBox(),this) {}

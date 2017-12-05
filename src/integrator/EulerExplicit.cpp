@@ -5,6 +5,7 @@
 #include <core/Context.h>
 #include <forcefield/ForceField.h>
 #include <dataStructures.h>
+#include <mapping/Mapping.h>
 
 EulerExplicit::EulerExplicit()
 : d_vdamping("vdamping",1.0,this) {}
