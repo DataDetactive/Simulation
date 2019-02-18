@@ -512,8 +512,9 @@ class Mat : public helper::fixed_array<VecNoInit<C,real>,L>
     for(int i=0;i<C-1;i++)
     {
       r[i]=(*this)[i][0] * v[0];
-      for(int j=1;j<C-1;j++)
+      for(int j=1;j<C-1;j++) {
     	  r[i] += (*this)[i][j] * v[j];
+      }
 	  r[i] += (*this)[i][C-1];
     }
     return r;

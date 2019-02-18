@@ -14,13 +14,13 @@ TetrahedronFEMForceField::TetrahedronFEMForceField()
 {}
 
 //// TODO : implement this function
-//void TetrahedronFEMForceField_assembled::init() {}
+//void TetrahedronFEMForceField::init() {}
 
 //// TODO : implement this function
-//void TetrahedronFEMForceField_assembled::addForce(TVecId vf) {}
+//void TetrahedronFEMForceField::addForce(TVecId vf) {}
 
 //// TODO : implement this function
-//void TetrahedronFEMForceField_assembled::addDForce(MechanicalParams params,TVecId vdx,TVecId vdf) {}
+//void TetrahedronFEMForceField::addDForce(MechanicalParams params,TVecId vdx,TVecId vdf) {}
 
 DECLARE_CLASS(TetrahedronFEMForceField)
 

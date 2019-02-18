@@ -7,11 +7,11 @@
 #include <animationloop/AnimationLoop.h>
 #include <state/State.h>
 #include <core/Visitor.h>
-#include <libxml/xmlreader.h>
 #include <constraint/Constraint.h>
 #include <constraint/PositionConstraint.h>
 #include <forcefield/ForceField.h>
 #include <forcefield/SpringForceField.h>
+#include <QXmlStreamReader>
 
 class PickingVisitor : public Visitor {
 public:
@@ -157,7 +157,7 @@ private:
     void update_picking_org(int x, int y);
     void updatePickingForce();
 
-    bool processNode(Node * node,xmlTextReaderPtr reader);
+    void processNode(Node * node,QXmlStreamReader & reader);
 };
 
 #endif

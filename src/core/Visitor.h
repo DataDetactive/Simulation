@@ -24,35 +24,4 @@ public :
     bool m_processChilds;
 };
 
-template<class T>
-class FindVisitor : public Visitor {
-public:
-
-    FindVisitor() {
-        m_object = NULL;
-    }
-
-    bool processObject(BaseObject * o)  {
-        if (dynamic_cast<T *>(o)) {
-            m_object = (T *) o;
-            return false;
-        }
-
-        return true;
-    }
-
-    T * getObject() {
-        return m_object;
-    }
-
-    static T * find(Context * c) {
-        FindVisitor<T> visitor;
-        visitor.execute(c);
-        return visitor.getObject();
-    }
-
-public:
-    T * m_object;
-};
-
 #endif

@@ -7,7 +7,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <png.h>
 #include <fstream>
 #include <core/Context.h>
 
@@ -25,7 +24,7 @@ void OglShader::init() {
 std::string OglShader::loadTextFile(const std::string& filename)
 {
     // Open the file passed in
-    std::ifstream fin(filename.c_str());
+    std::ifstream fin(getFullPath(filename.c_str()).c_str());
 
     // Make sure we opened the file correctly
     if(!fin) {

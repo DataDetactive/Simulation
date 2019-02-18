@@ -39,36 +39,58 @@ BoxConstraint::BoxConstraint()
 //}
 
 //// TODO : implement this function
-//void BoxConstraint::applyConstraint(TVecId vf) {}
-
-//// TODO : implement this function
-//void BoxConstraint::draw(DisplayFlag flag) {
-//    //if the flag STATE is not active we don’t anything
-//    if (! flag.isActive(DisplayFlag::STATE)) return;
-
-//    // draw the box
-//    glBegin(GL_LINES);// start drawing with line
-//        glColor3f(0.0f,0.0f,0.0f);
-
-//        glVertex3fv(p0.ptr());glVertex3fv(p1.ptr());
-//        glVertex3fv(p0.ptr());glVertex3fv(p2.ptr());
-//        ...
-
-//    glEnd();// end drawing with lines
-//    glLineWidth(1);
-
-//    // draw the fixed points
-//    glColor3f(1.0f,0.4f,0.4f);
-//    glPointSize(10);
-//    glBegin(GL_POINTS);// start drawing points
-//    const std::vector<TVec3> & pos = ...
-
-//    for all points in m_indices
-//        p = fixed point i
-//            glVertex3fv(p.ptr());
-
-//    glEnd();// end drawing with points
-//    glPointSize(1);
+//void BoxConstraint::applyConstraint(TVecId vf) {
+//    for all points i in the box
+//        vf[i] = 0
 //}
+
+
+void BoxConstraint::draw(DisplayFlag flag) {
+    if (! flag.isActive(DisplayFlag::STATE)) return;
+
+    State * mstate = this->getContext()->getMstate();
+    if (mstate == NULL) return;
+
+    glColor3f(1.0f,0.4f,0.4f);
+    glPointSize(10);
+    glBegin(GL_POINTS);
+    const std::vector<TVec3> & pos = mstate->get(VecID::position);
+
+    for (unsigned i=0;i<m_indices.size();i++) {
+        TVec3 p = pos[m_indices[i]];
+        glVertex3dv(p.data());
+    }
+    glEnd();
+    glPointSize(1);
+
+    glBegin(GL_LINES);
+    glColor3f(0.0f,0.0f,0.0f);
+    TVec3 p0 = TVec3(d_box.getValue().min[0],d_box.getValue().min[1],d_box.getValue().min[2]);
+    TVec3 p1 = TVec3(d_box.getValue().min[0],d_box.getValue().min[1],d_box.getValue().max[2]);
+    TVec3 p2 = TVec3(d_box.getValue().min[0],d_box.getValue().max[1],d_box.getValue().min[2]);
+    TVec3 p3 = TVec3(d_box.getValue().min[0],d_box.getValue().max[1],d_box.getValue().max[2]);
+    TVec3 p4 = TVec3(d_box.getValue().max[0],d_box.getValue().min[1],d_box.getValue().min[2]);
+    TVec3 p5 = TVec3(d_box.getValue().max[0],d_box.getValue().min[1],d_box.getValue().max[2]);
+    TVec3 p6 = TVec3(d_box.getValue().max[0],d_box.getValue().max[1],d_box.getValue().min[2]);
+    TVec3 p7 = TVec3(d_box.getValue().max[0],d_box.getValue().max[1],d_box.getValue().max[2]);
+
+    glVertex3dv(p0.data());glVertex3dv(p1.data());
+    glVertex3dv(p0.data());glVertex3dv(p2.data());
+    glVertex3dv(p1.data());glVertex3dv(p3.data());
+    glVertex3dv(p2.data());glVertex3dv(p3.data());
+
+    glVertex3dv(p4.data());glVertex3dv(p5.data());
+    glVertex3dv(p4.data());glVertex3dv(p6.data());
+    glVertex3dv(p5.data());glVertex3dv(p7.data());
+    glVertex3dv(p6.data());glVertex3dv(p7.data());
+
+    glVertex3dv(p0.data());glVertex3dv(p4.data());
+    glVertex3dv(p1.data());glVertex3dv(p5.data());
+    glVertex3dv(p2.data());glVertex3dv(p6.data());
+    glVertex3dv(p3.data());glVertex3dv(p7.data());
+
+    glEnd();
+    glLineWidth(1);
+}
 
 DECLARE_CLASS(BoxConstraint)

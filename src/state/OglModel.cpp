@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <png.h>
 #include <fstream>
 #include <core/Context.h>
 #include <visual/OglTexture.h>
@@ -75,6 +74,37 @@ void OglModel::updateNormals() {
         m_tangents[i].normalize();
     }
 }
+
+template<class T>
+class FindVisitor : public Visitor {
+public:
+
+    FindVisitor() {
+        m_object = NULL;
+    }
+
+    bool processObject(BaseObject * o)  {
+        if (dynamic_cast<T *>(o)) {
+            m_object = (T *) o;
+            return false;
+        }
+
+        return true;
+    }
+
+    T * getObject() {
+        return m_object;
+    }
+
+    static T * find(Context * c) {
+        FindVisitor<T> visitor;
+        visitor.execute(c);
+        return visitor.getObject();
+    }
+
+public:
+    T * m_object;
+};
 
 void OglModel::draw(DisplayFlag flag) {
     if (!flag.isActive(DisplayFlag::VISUAL)) return;

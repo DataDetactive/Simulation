@@ -4,6 +4,7 @@
 #include <animationloop/DefaultAnimationLoop.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <QFile>
 
 Simulation::Simulation() {
     light_ambient = TColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -25,29 +26,15 @@ void Simulation::addPickingStiffness(double a) {
 bool Simulation::read_scene(const char * fn) {
     m_filename = getFullPath(fn);
 
-    xmlTextReaderPtr reader = xmlReaderForFile(m_filename.c_str(), NULL, 0);
+    QFile fileScn(m_filename.c_str());
 
-    if (reader != NULL) {
-        xmlTextReaderRead(reader);
-        xmlNodePtr node= xmlTextReaderCurrentNode(reader);
+    if (!fileScn.open(QIODevice::ReadOnly)) return false;
 
-        if ((!xmlStrEqual(node->name, (const xmlChar *)"Node"))) {
-            std::cerr << "Error the scene must start with a Node but start with " << node->name << std::endl;
-            return 1;
-        }
+    main_Node = new Node();
 
-        main_Node = new Node();
-
-        if (! processNode(main_Node,reader)) {
-            std::cerr << "Error format not correct" << std::endl;
-            return 1;
-        }
-
-        xmlFreeTextReader(reader);
-    } else {
-        std::cerr << "Unable to open " << m_filename << std::endl;
-        return false;
-    }
+    QXmlStreamReader xml(&fileScn);
+    xml.readNextStartElement();
+    processNode(main_Node,xml);
 
     return true;
 }
@@ -56,75 +43,42 @@ std::string Simulation::getFileName() {
     return m_filename;
 }
 
-bool Simulation::processNode(Node * node,xmlTextReaderPtr reader) {
-    xmlNodePtr xmlnode= xmlTextReaderCurrentNode(reader);
+void Simulation::processNode(Node * node,QXmlStreamReader & xml) {
+    if (xml.name() != "Node") return;
 
-    if (xmlTextReaderNodeType(reader)==1 && xmlnode && xmlnode->properties) {
-        xmlAttr* attribute = xmlnode->properties;
+    QXmlStreamAttributes attributes = xml.attributes();
+    for (int i=0;i<attributes.size();i++) {
+        node->setAttribute(attributes[i].name().toString().toStdString().c_str(),
+                           attributes[i].value().toString().toStdString().c_str());
 
-        while(attribute && attribute->name && attribute->children) {
-          xmlChar* value = xmlNodeListGetString(xmlnode->doc, attribute->children, 1);
-
-          node->setAttribute((const char*) attribute->name, (const char *) value);
-
-          xmlFree(value);
-
-          attribute = attribute->next;
-        }
     }
 
+    while (! xml.atEnd()) {
+        xml.readNextStartElement();
 
-    while (xmlTextReaderRead(reader)) {
-        const xmlChar * name = xmlTextReaderConstName(reader);
+        if (xml.tokenType() == QXmlStreamReader::TokenType::StartElement) {
+            std::string className = xml.name().toString().toStdString();
 
-        if ((xmlStrEqual(name, (const xmlChar *)"#document"))) {
-            std::cerr << "Error xml parser returned a document did you inverse <Node/> and </Node> ?" << std::endl;
-            return false;
-        }
+            BaseObject * obj = Factory::getInstance(className.c_str());
 
-        if (xmlTextReaderNodeType(reader) == 15) return true;
+            if (obj != NULL) {
+                node->attach(obj);
 
-        if (xmlTextReaderNodeType(reader) == 1) {
-            if ((xmlStrEqual(name, (const xmlChar *)"Node"))) {
-                Node * new_node = (Node *) Factory::getInstance("Node");
+                QXmlStreamAttributes attributes = xml.attributes();
+                for (int i=0;i<attributes.size();i++) {
+                    obj->setAttribute(attributes[i].name().toString().toStdString().c_str(),
+                                      attributes[i].value().toString().toStdString().c_str());
 
-                //set the gravity and dt of the parent before checking parameter of the xml
-                new_node->d_dt.setValue(node->d_dt.getValue());
-                new_node->d_gravity.setValue(node->d_gravity.getValue());
-
-                processNode(new_node,reader);
-
-                node->attach(new_node);
-            } else {
-                BaseObject * obj = Factory::getInstance((const char *) name);
-
-                if (obj == NULL) {
-                    std::cerr << "Error cannot create " << name << std::endl;
-                } else {
-
-                    xmlNodePtr xmlnode= xmlTextReaderCurrentNode(reader);
-
-                    if (xmlTextReaderNodeType(reader)==1 && xmlnode && xmlnode->properties) {
-                        xmlAttr* attribute = xmlnode->properties;
-
-                        while(attribute && attribute->name && attribute->children) {
-                          xmlChar* value = xmlNodeListGetString(xmlnode->doc, attribute->children, 1);
-
-                          obj->setAttribute((const char*) attribute->name, (const char *) value);
-
-                          xmlFree(value);
-
-                          attribute = attribute->next;
-                        }
-                    }
-
-                    node->attach(obj);
                 }
+
+                if (Node* newctx = dynamic_cast<Node*>(obj)) processNode(newctx,xml);
+            } else {
+                std::cerr << "Error cannot create " << className << std::endl;
             }
+        } else if (xml.tokenType() == QXmlStreamReader::TokenType::EndElement) {
+            if (xml.name() == "Node") return;
         }
     }
-
-    return true;
 }
 
 void Simulation::init()
@@ -195,6 +149,36 @@ void Simulation::init()
     //glDisableClientState(GL_NORMAL_ARRAY);
 }
 
+template<class T>
+class FindVisitor : public Visitor {
+public:
+
+    FindVisitor() {
+        m_object = NULL;
+    }
+
+    bool processObject(BaseObject * o)  {
+        if (dynamic_cast<T *>(o)) {
+            m_object = (T *) o;
+            return false;
+        }
+
+        return true;
+    }
+
+    T * getObject() {
+        return m_object;
+    }
+
+    static T * find(Context * c) {
+        FindVisitor<T> visitor;
+        visitor.execute(c);
+        return visitor.getObject();
+    }
+
+public:
+    T * m_object;
+};
 
 void Simulation::step() {
     updatePickingForce();

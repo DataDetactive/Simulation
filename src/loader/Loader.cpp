@@ -15,17 +15,14 @@ Loader::Loader()
 }
 
 void Loader::init() {
-    Topology * topo = FindVisitor<Topology>::find(this->getContext());
+    Topology * topo = this->getContext()->getTopology();
 
     if (topo == NULL) {
         std::cerr << "Error the loader " << this->getName() << " cannot find the topology" << std::endl;
         return;
     }
 
-
-    FindVisitor<State> v2;
-    this->getContext()->processVisitor(v2);
-    State * state = v2.getObject();
+    State * state = this->getContext()->getMstate();
 
     if (state == NULL) {
         std::cerr << "Error the loader " << this->getName() << " cannot find the state" << std::endl;

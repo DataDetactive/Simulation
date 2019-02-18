@@ -12,7 +12,7 @@ void BarycentricMapping::init() {
     if (m_stateTo == NULL) return;
 
     // we need the topology of the mstateFrom, we exectute a visitor from the context of the mstateFrom
-    m_topology = FindVisitor<Topology>::find(m_stateFrom->getContext());
+    m_topology = m_stateFrom->getContext()->getTopology();
     if (m_topology == NULL) {
         std::cerr << "Error BarycentricMapping " << this->getName() << " cannot find topology from mstate " << m_stateFrom->getName() << std::endl;
         return;
@@ -87,10 +87,21 @@ int BarycentricMapping::computeBaryCoords(TVec3 out,const std::vector<TTetra> & 
 }
 
 //// TODO : implement this function
-//void BarycentricMapping::apply() {}
+//void BarycentricMapping::apply() {
+//    for all points i in the dst state
+//        dst[i] = a * p0 + b * p1 + c * p2 + d * p3
+//        where p0 is a TVec3 containing the positions of the first point of the tetraheda containing dst[i] in the src topology.
+//        a,b,c,d are stored in m_map_f[i], it gives the barycentric coordinates of the point dst[i] in the source tetra whose index is m_map_i[i].
+//}
 
 //// TODO : implement this function
-//void BarycentricMapping::applyJT(TVecId vf) {}
+//void BarycentricMapping::applyJT(TVecId vf) {
+//    for all points i in the dst state
+//      src->vf[p0] += dst->vf[i] * a;
+//      src->vf[p1] += dst->vf[i] * b;
+//      src->vf[p2] += dst->vf[i] * c;
+//      src->vf[p3] += dst->vf[i] * d;
+//}
 
 void BarycentricMapping::draw(DisplayFlag flag) {
     if (!flag.isActive(DisplayFlag::MAPPING)) return;

@@ -34,8 +34,8 @@ public:
         if (c1 == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate source" << std::endl;
         if (c2 == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate source" << std::endl;
 
-        m_stateFrom = FindVisitor<State>::find(c1);
-        m_stateTo = FindVisitor<State>::find(c2);
+        m_stateFrom = c1->getMstate();
+        m_stateTo = c2->getMstate();
 
         if (m_stateFrom == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate source" << std::endl;
         if (m_stateTo == NULL) std::cerr << "Error Mapping " << this->getName() << " cannot find the mstate destination" << std::endl;

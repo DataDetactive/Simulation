@@ -76,6 +76,12 @@ std::string Gui::getFullPath(const char * fn) {
         if (f.good()) return filename;
     }
 
+    {
+        std::string filename = std::string(PLUGIN_DATA_DIR_) + "data/" + fn;
+        std::ifstream f(filename.c_str());
+        if (f.good()) return filename;
+    }
+
     return std::string(fn);
 }
 
