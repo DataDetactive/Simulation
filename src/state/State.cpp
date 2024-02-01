@@ -11,7 +11,15 @@ State::State() {
 }
 
 //// TODO : implement this function
-//void State::vClear(TVecId va) {}
+void State::vClear(TVecId va) {
+    std::vector<TVec3> & cleared_vector = this->get(va);
+    for (std::vector<TVec3>::size_type j=0;j<cleared_vector.size();j++){
+        cleared_vector[j][0]=0;
+        cleared_vector[j][1]=0;
+        cleared_vector[j][2]=0;
+
+    }
+}
 
 //// TODO : implement this function
 //void State::vEqBF(TVecId va,TVecId vb,TReal  h) {}
