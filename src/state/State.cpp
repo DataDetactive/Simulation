@@ -22,7 +22,14 @@ void State::vClear(TVecId va) {
 }
 
 //// TODO : implement this function
-//void State::vEqBF(TVecId va,TVecId vb,TReal  h) {}
+void State::vEqBF(TVecId va,TVecId vb,TReal  h) {
+    std::vector<TVec3> & resulted_vector = this ->get(va);
+    std::vector<TVec3> & vector_B = this->get(vb);
+    for(std::vector<TVec3>::size_type l=0;l<resulted_vector.size();l++){
+        resulted_vector[l] = vector_B[l]*h;
+
+    }
+}
 
 //// TODO : implement this function
 //void State::vPEqBF(TVecId va,TVecId vb,TReal  h) {}
