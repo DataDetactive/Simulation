@@ -32,7 +32,19 @@ void State::vEqBF(TVecId va,TVecId vb,TReal  h) {
 }
 
 //// TODO : implement this function
-//void State::vPEqBF(TVecId va,TVecId vb,TReal  h) {}
+void State::vPEqBF(TVecId va,TVecId vb,TReal  h) {
+    std::vector<TVec3> & A = this ->get(va);
+    std::vector<TVec3> & B = this->get(vb);
+    for(std::vector<TVec3>::size_type i=0;i<A.size();i++){
+        for(std::vector<TVec3>::size_type j=0;j<A[i].size();j++){
+            A[i][j] += B[i][j] * h;
+        }
+
+
+    }
+
+
+}
 
 //// TODO : implement this function
 //void State::vOp(TVecId vres, TVecId va, TVecId vb, TReal f ) {}
