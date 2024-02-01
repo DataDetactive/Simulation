@@ -63,7 +63,19 @@ void State::vOp(TVecId vres, TVecId va, TVecId vb, TReal f ) {
 }
 
 //// TODO : implement this function
-//TReal State::vDot(TVecId va, TVecId vb) {}
+TReal State::vDot(TVecId va, TVecId vb) {
+
+    std::vector<TVec3> & A = this ->get(va);
+    std::vector<TVec3> & B = this->get(vb);
+    double scaler_result = 0;
+
+    for(std::vector<TVec3>::size_type i=0;i<A.size();i++){
+        scaler_result += (A[i])*(B[i]);
+    }
+    return scaler_result;
+
+
+}
 
 void State::addPoint(TVec3 p) {
     std::vector<TVec3> & X = this->get(VecID::position);
