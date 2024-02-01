@@ -87,21 +87,83 @@ int BarycentricMapping::computeBaryCoords(TVec3 out,const std::vector<TTetra> & 
 }
 
 //// TODO : implement this function
-//void BarycentricMapping::apply() {
+void BarycentricMapping::apply() {
+    const std::vector<TTetra> & tetras = m_topology->getTetras();
+        const std::vector<TVec3> & in = m_stateFrom->get(VecID::position);
+        std::vector<TVec3> & out = m_stateTo->get(VecID::position);
+
+        TReal a,b,c,d;
+
+        TVec3 dst, p0,p1,p2,p3;
+
+        int index;
+
+        for(unsigned i=0;i<m_map_i.size();i++){
+            a = m_map_f[i][0];
+            b = m_map_f[i][1];
+            c = m_map_f[i][2];
+            d = m_map_f[i][3];
+
+            index = m_map_i[i];
+
+            p0 = in[tetras[index][0]];
+            p1 = in[tetras[index][1]];
+            p2 = in[tetras[index][2]];
+            p3 = in[tetras[index][3]];
+
+            dst =  p0*a + p1*b + p2*c + p3*d;
+
+            out[i][0] = dst[0];
+            out[i][1] = dst[1];
+            out[i][2] = dst[2];
+          }
+
+
+
+
 //    for all points i in the dst state
 //        dst[i] = a * p0 + b * p1 + c * p2 + d * p3
 //        where p0 is a TVec3 containing the positions of the first point of the tetraheda containing dst[i] in the src topology.
 //        a,b,c,d are stored in m_map_f[i], it gives the barycentric coordinates of the point dst[i] in the source tetra whose index is m_map_i[i].
-//}
+}
 
 //// TODO : implement this function
-//void BarycentricMapping::applyJT(TVecId vf) {
+void BarycentricMapping::applyJT(TVecId vf) {
+    const std::vector<TTetra> & tetras = m_topology->getTetras();
+       //std::vector<TVec3> & out = m_stateTo->get(VecID::position);
+       const std::vector<TVec3> & forceTo = m_stateTo->get(VecID::force);
+       std::vector<TVec3> & forceFrom = m_stateFrom->get(vf);
+
+       //std::vector<TVec3> & a = this->get(va);
+
+       TReal a,b,c,d;
+
+       int point0,point1,point2,point3,index;
+
+       for(unsigned i=0;i<m_map_i.size();i++){
+           a = m_map_f[i][0];
+           b = m_map_f[i][1];
+           c = m_map_f[i][2];
+           d = m_map_f[i][3];
+
+           index = m_map_i[i];
+
+           point0 = tetras[index][0];
+           point1 = tetras[index][1];
+           point2 = tetras[index][2];
+           point3 = tetras[index][3];
+
+           forceFrom[point0] += forceTo[i]*a;
+           forceFrom[point1] += forceTo[i]*b;
+           forceFrom[point2] += forceTo[i]*c;
+           forceFrom[point3] += forceTo[i]*d;
+       }
 //    for all points i in the dst state
 //      src->vf[p0] += dst->vf[i] * a;
 //      src->vf[p1] += dst->vf[i] * b;
 //      src->vf[p2] += dst->vf[i] * c;
 //      src->vf[p3] += dst->vf[i] * d;
-//}
+}
 
 void BarycentricMapping::draw(DisplayFlag flag) {
     if (!flag.isActive(DisplayFlag::MAPPING)) return;
