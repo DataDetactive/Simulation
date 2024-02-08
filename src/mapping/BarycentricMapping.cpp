@@ -158,6 +158,13 @@ void BarycentricMapping::applyJT(TVecId vf) {
            forceFrom[point2] += forceTo[i]*c;
            forceFrom[point3] += forceTo[i]*d;
        }
+
+
+
+
+
+
+
 //    for all points i in the dst state
 //      src->vf[p0] += dst->vf[i] * a;
 //      src->vf[p1] += dst->vf[i] * b;
