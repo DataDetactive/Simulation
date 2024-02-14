@@ -12,7 +12,7 @@
                 <MechanicalObject name="mstate" />
 		
                 <UniformMass name="mass" mass="0.2" />
-                <TetrahedronFEMForceField youngModulus="500" poissonRatio="0.4" method="large" />
+                <TetrahedronFEMForceField youngModulus="500" poissonRatio="0.4" method="small" />
 		
                 <BoxConstraint name="b2" box="-1 -1 -1  10 10 10" />
 		
